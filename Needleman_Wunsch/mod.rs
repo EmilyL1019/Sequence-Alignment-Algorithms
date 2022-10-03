@@ -1,7 +1,7 @@
 mod grid;
 mod alignment;
 // ToDo:
-pub fn align(mut seq1: String, mut seq2: String) {
+pub fn align(mut seq1: String, mut seq2: String) -> (Vec<String>, Vec<String>, i32){
     // Get the length
     let len1 = seq1.len() as i32;
     let len2 = seq2.len() as i32;
@@ -11,6 +11,7 @@ pub fn align(mut seq1: String, mut seq2: String) {
     let (aligned_seq1, aligned_seq2) = alignment::build_best_alignment(&grid, &directions, len1 * len2 - 1, &mut seq1, &mut seq2);
     let score = alignment::score(&aligned_seq1[0], &aligned_seq2[0]);
     alignment::print_alignments(&aligned_seq1, &aligned_seq2, score);
+    return (aligned_seq1, aligned_seq2, score); 
 }
 
 #[cfg(test)]
@@ -19,6 +20,7 @@ mod tests {
     use crate::Needleman_Wunsch::alignment::build_best_alignment;
     use crate::Needleman_Wunsch::alignment::print_alignments;
     use crate::Needleman_Wunsch::alignment::score;
+    use crate::Needleman_Wunsch::align;
     #[test]
     fn test1() {
         let grid: Vec<i32> = vec![0, -1, -2, -3, -4, -5, -6, -7, -8, -9, -10,
@@ -61,6 +63,15 @@ mod tests {
         assert_eq!(score, 1);
     }
     #[test]
+    fn clam_ftn_test1() {
+        let seq1 : String = "GTCAGGATCT".to_string();
+        let seq2 : String = "ATCAAGGCCA".to_string();
+        let (aligned_seq1, aligned_seq2, score) = align(seq1, seq2);
+        assert_eq!(aligned_seq1, vec!["GTC-AGGATCT", "GTCA-GGATCT", "GTC-AGGATCT", "GTCA-GGATCT"]);
+        assert_eq!(aligned_seq2, vec!["ATCAAGG-CCA", "ATCAAGG-CCA", "ATCAAGGC-CA", "ATCAAGGC-CA"]);
+        assert_eq!(score, 1);
+    }
+    #[test]
     fn test2() {
         let grid = vec![0, -1, -2, -3, -4, -5,
         -1, -1, -2, -3, -2, -3,
@@ -93,6 +104,15 @@ mod tests {
         let (aligned_seq1, aligned_seq2) = build_best_alignment(&ftn_grid, &ftn_directions, 39, &mut seq1, &mut seq2);
         let score = score(&aligned_seq1[0],&aligned_seq2[0]);
         print_alignments(&aligned_seq1, &aligned_seq2, score);
+        assert_eq!(aligned_seq1, vec!["ATGCAGGA"]);
+        assert_eq!(aligned_seq2, vec!["CTG-A--A"]);
+        assert_eq!(score, 0);
+    }
+    #[test]
+    fn clam_ftn_test2() {
+        let seq1 : String = "ATGCAGGA".to_string();
+        let seq2 : String = "CTGAA".to_string();
+        let (aligned_seq1, aligned_seq2, score) = align(seq1, seq2);
         assert_eq!(aligned_seq1, vec!["ATGCAGGA"]);
         assert_eq!(aligned_seq2, vec!["CTG-A--A"]);
         assert_eq!(score, 0);
@@ -172,6 +192,25 @@ mod tests {
     }
 
     #[test]
+    fn clam_ftn_test3() {
+        let seq1 : String = "AAGTAAGGTGCAGAATGAAA".to_string();
+        let seq2 : String = "CATTCAGGAAGCTGT".to_string();
+        let (aligned_seq1, aligned_seq2, score) = align(seq1, seq2);
+        assert_eq!(aligned_seq1, vec!["AAGTAAGGTGCAGAATGAAA", "AAGTAAGGTGCAGAATGAAA", "AAGTAAGGTGCAGAATGAAA", "AAGTAAGGTGCAGAATGAAA", "AAGTAAGGTGCAGAATGAAA", "AAGTAAGGTGCAGAATGAAA",
+        "AAGTAAGGTGCAGAATGAAA", "AAGTAAGGTGCAGAATGAAA", "AAGTAAGGTGCAGAATGAAA", "AAGTAAGGTGCAGAATGAAA", "AAGTAAGGTGCAGAATGAAA", "AAGTAAGGTGCAGAATGAAA",
+        "AAGTAAGGTGCAGAATGAAA", "AAGTAAGGTGCAGAATGAAA", "AAGTAAGGTGCAGAATGAAA", "AAGTAAGGTGCAGAATGAAA", "AAGTAAGGTGCAGAATGAAA", "AAGTAAGGTGCAGAATGAAA",
+        "AAGTAAGGTGCAGAATGAAA", "AAGTAAGGTGCAGAATGAAA", "AAGTAAGGTGCAGAATGAAA", "AAGTAAGGTGCAGAATGAAA", "AAGTAAGGTGCAGAATGAAA", "AAGTAAGGTGCAGAATGAAA",
+        "AAGTAAGGTGCAGAATGAAA", "AAGTAAGGTGCAGAATGAAA", "AAGTAAGGTGCAGAATGAAA", "AAGTAAGGTGCAGAATGAAA", "AAGTAAGGTGCAGAATGAAA", "AAGTAAGGTGCAGAATGAAA"]);
+        assert_eq!(aligned_seq2, vec!["CATTCA-G-GAAG-CTG--T", "CATTCAG--GAAG-CTG--T", "CATTCAGG--AAG-CTG--T", "CATTCAGG-A-AG-CTG--T", "CATTCAGGA--AG-CTG--T", 
+        "CATTCA-G-GAAGC-TG--T", "CATTCAG--GAAGC-TG--T", "CATTCAGG--AAGC-TG--T", "CATTCAGG-A-AGC-TG--T", "CATTCAGGA--AGC-TG--T", 
+        "CATTCA-G-GAAG-CTG-T-", "CATTCAG--GAAG-CTG-T-", "CATTCAGG--AAG-CTG-T-", "CATTCAGG-A-AG-CTG-T-", "CATTCAGGA--AG-CTG-T-", 
+        "CATTCA-G-GAAGC-TG-T-", "CATTCAG--GAAGC-TG-T-", "CATTCAGG--AAGC-TG-T-", "CATTCAGG-A-AGC-TG-T-", "CATTCAGGA--AGC-TG-T-", 
+        "CATTCA-G-GAAG-CTGT--", "CATTCAG--GAAG-CTGT--", "CATTCAGG--AAG-CTGT--", "CATTCAGG-A-AG-CTGT--", "CATTCAGGA--AG-CTGT--",
+        "CATTCA-G-GAAGC-TGT--", "CATTCAG--GAAGC-TGT--", "CATTCAGG--AAGC-TGT--", "CATTCAGG-A-AGC-TGT--", "CATTCAGGA--AGC-TGT--"]);
+        assert_eq!(score, -2);
+    }
+
+    #[test]
     fn test4() {
         let grid = vec![0, -1, -2, -3, -4, -5, -6, -7, -8, -9,
         -1, -1, -2, -3, -4, -3, -4, -5, -6, -7,
@@ -203,6 +242,16 @@ mod tests {
         let (aligned_seq1, aligned_seq2) = build_best_alignment(&ftn_grid, &ftn_directions, 53, &mut seq1, &mut seq2);
         let score = score(&aligned_seq1[0], &aligned_seq2[0]);
         print_alignments(&aligned_seq1, &aligned_seq2, score);
+        assert_eq!(aligned_seq1, vec!["--TG-ACTG", "-T-G-ACTG", "T--G-ACTG", "-TG--ACTG", "T-G--ACTG"]);
+        assert_eq!(aligned_seq2, vec!["AAGGTACAA", "AAGGTACAA", "AAGGTACAA", "AAGGTACAA", "AAGGTACAA"]);
+        assert_eq!(score, -3);
+    }
+
+    #[test]
+    fn clam_ftn_test4() {
+        let seq1 : String = "TGACTG".to_string();
+        let seq2 : String = "AAGGTACAA".to_string();
+        let (aligned_seq1, aligned_seq2, score) = align(seq1, seq2);
         assert_eq!(aligned_seq1, vec!["--TG-ACTG", "-T-G-ACTG", "T--G-ACTG", "-TG--ACTG", "T-G--ACTG"]);
         assert_eq!(aligned_seq2, vec!["AAGGTACAA", "AAGGTACAA", "AAGGTACAA", "AAGGTACAA", "AAGGTACAA"]);
         assert_eq!(score, -3);
@@ -246,6 +295,16 @@ mod tests {
         let (aligned_seq1, aligned_seq2) = build_best_alignment(&ftn_grid, &ftn_directions, 53, &mut seq1, &mut seq2);
         let score = score(&aligned_seq1[0], &aligned_seq2[0]);
         print_alignments(&aligned_seq1, &aligned_seq2, score);
+        assert_eq!(aligned_seq1, vec!["CTAGATGAG-", "CT-AGATGAG"]);
+        assert_eq!(aligned_seq2, vec!["-T---TCAGT", "TTCAG-T---"]);
+        assert_eq!(score, -2);
+    }
+    
+    #[test]
+    fn clam_ftn_test5() {
+        let seq1 : String = "CTAGATGAG".to_string();
+        let seq2 : String = "TTCAGT".to_string();
+        let (aligned_seq1, aligned_seq2, score) = align(seq1, seq2);
         assert_eq!(aligned_seq1, vec!["CTAGATGAG-", "CT-AGATGAG"]);
         assert_eq!(aligned_seq2, vec!["-T---TCAGT", "TTCAG-T---"]);
         assert_eq!(score, -2);
@@ -307,6 +366,30 @@ mod tests {
     }
 
     #[test]
+    fn clam_ftn_test6() {
+        let seq1 : String = "TTTGATGT".to_string();
+        let seq2 : String = "AAACTACA".to_string();
+        let (aligned_seq1, aligned_seq2, score) = align(seq1, seq2);
+        assert_eq!(aligned_seq1, vec!["TTTGA-T-GT", "TTTGA-T-GT", "TTTGA-T-GT", "TTTGA-T-GT", "TTTGA-T-GT", 
+        "TTTGA-T-GT", "--TTTGATGT", "-T-TTGATGT", "T--TTGATGT", "-TT-TGATGT", 
+        "T-T-TGATGT", "TT--TGATGT", "TTTGA-TG-T", "TTTGA-TG-T", "TTTGA-TG-T", 
+        "TTTGA-TG-T", "TTTGA-TG-T", "TTTGA-TG-T", "--TTTGATGT", "-T-TTGATGT", 
+        "T--TTGATGT", "-TT-TGATGT", "T-T-TGATGT", "TT--TGATGT", "TTTGA-TGT-", 
+        "TTTGA-TGT-", "TTTGA-TGT-", "TTTGA-TGT-", "TTTGA-TGT-", "TTTGA-TGT-", 
+        "--TTTGATGT", "-T-TTGATGT", "T--TTGATGT", "-TT-TGATGT", "T-T-TGATGT",
+        "TT--TGATGT"]);
+        assert_eq!(aligned_seq2, vec!["--AAACTACA", "-A-AACTACA", "A--AACTACA", "-AA-ACTACA", "A-A-ACTACA", 
+        "AA--ACTACA", "AAACT-A-CA", "AAACT-A-CA", "AAACT-A-CA", "AAACT-A-CA", 
+        "AAACT-A-CA", "AAACT-A-CA", "--AAACTACA", "-A-AACTACA", "A--AACTACA", 
+        "-AA-ACTACA", "A-A-ACTACA", "AA--ACTACA", "AAACT-AC-A", "AAACT-AC-A",
+        "AAACT-AC-A", "AAACT-AC-A", "AAACT-AC-A", "AAACT-AC-A", "--AAACTACA",
+        "-A-AACTACA", "A--AACTACA", "-AA-ACTACA", "A-A-ACTACA", "AA--ACTACA", 
+        "AAACT-ACA-", "AAACT-ACA-", "AAACT-ACA-", "AAACT-ACA-", "AAACT-ACA-",
+        "AAACT-ACA-"]);
+        assert_eq!(score, -6);
+    }
+
+    #[test]
     fn test7() {
         let grid = vec![0, -1, -2, -3, -4, -5,
         -1, -1, -2, -3, -4, -5,
@@ -341,4 +424,13 @@ mod tests {
         assert_eq!(score, -5);
     }
 
+    #[test]
+    fn clam_ftn_test7() {
+        let seq1 : String = "AAAAA".to_string();
+        let seq2 : String = "TTTTT".to_string();
+        let (aligned_seq1, aligned_seq2, score) = align(seq1, seq2);
+        assert_eq!(aligned_seq1, vec!["AAAAA"]);
+        assert_eq!(aligned_seq2, vec!["TTTTT"]);
+        assert_eq!(score, -5);
+    }
 }
