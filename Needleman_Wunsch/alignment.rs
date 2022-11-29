@@ -1,3 +1,4 @@
+use super::grid::Direction;
 // Transforms the vector of characters into one sequence string
 fn char_to_string(characters: Vec<char>) -> String {
     let sequence: String = characters.into_iter().collect();
@@ -5,28 +6,25 @@ fn char_to_string(characters: Vec<char>) -> String {
 }
 
 // Find best alignment
-fn priv_best_alignment<'a>(score_grid: &'a Vec<i32>,directions: &'a Vec<String>, cell: i32, seq1: &'a mut String, seq2: &'a mut String, aligned_seq1: &'a mut Vec<Vec<char>>, aligned_seq2: &'a mut Vec<Vec<char>>, aligned_seq_index: &'a mut usize) -> (Vec<String>, Vec<String>){
-    let mut seq1_char_index = ((cell - (cell % seq2.len() as i32)) / seq2.len() as i32) as usize;
-    let mut seq2_char_index = (cell % seq2.len() as i32) as usize;
+fn priv_best_alignment<'a>(score_grid: &'a Vec<i32>,directions: &'a Vec<Direction>, cell: i32, seq1: &'a mut String, seq2: &'a mut String, aligned_seq1: &'a mut Vec<Vec<char>>, aligned_seq2: &'a mut Vec<Vec<char>>, aligned_seq_index: &'a mut usize) -> (Vec<String>, Vec<String>){
+    let seq2_len = seq2.len() as i32;
+    let mut seq1_char_index = ((cell - (cell % seq2_len as i32)) / seq2_len as i32) as usize;
+    let mut seq2_char_index = (cell % seq2_len as i32) as usize;
     let seq1_char:char = seq1.chars().nth(seq1_char_index).unwrap();
     let seq2_char:char = seq2.chars().nth(seq2_char_index).unwrap();
     let direction_index = cell as usize;
     // Recursive cases: Go through directions;
     let mut new_aligned_seq1:&'a mut Vec<Vec<char>> = aligned_seq1;
     let mut new_aligned_seq2: &'a mut Vec<Vec<char>> = aligned_seq2;
-    // Keeps track of how many directions the cell has
-    let mut has_diagonal:bool = false;
-    let mut has_left:bool = false;
     // If the current direction index is D, add the two corresponding characters to the sequence strings    
-    if directions[direction_index].contains("D") {
+    if (directions[direction_index] == Direction::Diagonal) || (directions[direction_index] == Direction::DiagonalLeft) || (directions[direction_index] == Direction::DiagonalUp) || (directions[direction_index] == Direction::DiagonalUpLeft) {
         let copy_aligned_seq1:&mut Vec<Vec<char>> = &mut new_aligned_seq1;
         let copy_aligned_seq2:&mut Vec<Vec<char>> = &mut new_aligned_seq2;
-        has_diagonal = true;
         copy_aligned_seq1[*aligned_seq_index].insert(0, seq1_char);
         copy_aligned_seq2[*aligned_seq_index].insert(0, seq2_char);
-       // Move to the cell to the diagonally left of the current cell
-        if (direction_index as i32 - seq2.len() as i32 - 1) as i32 >= 0 && seq1_char_index > 0 && seq2_char_index > 0{
-            priv_best_alignment(score_grid, directions, cell - seq2.len() as i32 - 1, seq1, seq2, copy_aligned_seq1, copy_aligned_seq2, aligned_seq_index);
+        // Move to the cell to the diagonally left of the current cell
+        if (direction_index as i32 - seq2_len - 1) as i32 >= 0 && seq1_char_index > 0 && seq2_char_index > 0{
+            priv_best_alignment(score_grid, directions, cell - seq2_len as i32 - 1, seq1, seq2, copy_aligned_seq1, copy_aligned_seq2, aligned_seq_index);
         }
         // Add gaps if necessary to have two sequences of equal length
         else {
@@ -43,12 +41,11 @@ fn priv_best_alignment<'a>(score_grid: &'a Vec<i32>,directions: &'a Vec<String>,
         }
     }
     // If the current direction index is L, add a gap to the sequence 1 string and the corresponding character to the sequence 2 string
-    if directions[direction_index].contains("L") {
+    if (directions[direction_index] == Direction::Left) || (directions[direction_index] == Direction::DiagonalLeft) || (directions[direction_index] == Direction::UpLeft) || (directions[direction_index] == Direction::DiagonalUpLeft) {
         let copy_aligned_seq1:&mut Vec<Vec<char>> = &mut new_aligned_seq1;
         let copy_aligned_seq2:&mut Vec<Vec<char>> = &mut new_aligned_seq2;
-        has_left = true;
         // Check if cell has multiple paths
-        if has_diagonal {
+        if (directions[direction_index] == Direction::DiagonalLeft) || (directions[direction_index] == Direction::DiagonalUpLeft) {
            let new_index = *aligned_seq_index + 1;
             while new_index > *aligned_seq_index {    
                 copy_aligned_seq1.insert(*aligned_seq_index + 1, vec![]);
@@ -64,11 +61,11 @@ fn priv_best_alignment<'a>(score_grid: &'a Vec<i32>,directions: &'a Vec<String>,
         }
     }
     // If the current direction index is U, add the corresponding character to the sequence 1 string and a gap to the sequence 2 string
-    if directions[direction_index].contains("U") {
+    if (directions[direction_index] == Direction::Up) || (directions[direction_index] == Direction::DiagonalUp) || (directions[direction_index] == Direction::UpLeft) || (directions[direction_index] == Direction::DiagonalUpLeft){
         let copy_aligned_seq1_2:&mut Vec<Vec<char>> = &mut new_aligned_seq1;
         let copy_aligned_seq2_2:&mut Vec<Vec<char>> = &mut new_aligned_seq2;
         // Check if cell has multiple paths
-        if has_diagonal || has_left {
+        if !(directions[direction_index] == Direction::Up){
             let new_index = *aligned_seq_index + 1;
             while new_index > *aligned_seq_index {    
                 copy_aligned_seq1_2.insert(*aligned_seq_index + 1, vec![]);
@@ -79,8 +76,8 @@ fn priv_best_alignment<'a>(score_grid: &'a Vec<i32>,directions: &'a Vec<String>,
         copy_aligned_seq1_2[*aligned_seq_index].insert(0, seq1_char);
         copy_aligned_seq2_2[*aligned_seq_index].insert(0, '-');    
         // Move to the cell above the current cell
-        if (direction_index - seq2.len()) as i32 >= 0 {
-            priv_best_alignment(score_grid, directions, cell - seq2.len() as i32, seq1, seq2, copy_aligned_seq1_2, copy_aligned_seq2_2, aligned_seq_index);
+        if (direction_index as i32 - seq2_len) as i32 >= 0 {
+            priv_best_alignment(score_grid, directions, cell - seq2_len as i32, seq1, seq2, copy_aligned_seq1_2, copy_aligned_seq2_2, aligned_seq_index);
         }
     }
     // Base case: Turn finished aligned sequences into strings and return them
@@ -95,7 +92,7 @@ fn priv_best_alignment<'a>(score_grid: &'a Vec<i32>,directions: &'a Vec<String>,
     return (str_aligned_seq1, str_aligned_seq2);
 }
     
-pub fn build_best_alignment<'a>(score_grid: &'a Vec<i32>,directions: &'a Vec<String>, cell: i32, seq1: &'a mut String, seq2: &'a mut String) -> (Vec<String>, Vec<String>){
+pub fn build_best_alignment<'a>(score_grid: &'a Vec<i32>,directions: &'a Vec<Direction>, cell: i32, seq1: &'a mut String, seq2: &'a mut String) -> (Vec<String>, Vec<String>){
     let mut aligned_sequence1:Vec<Vec<char>> = vec![[].to_vec()];
     let mut aligned_sequence2:Vec<Vec<char>> = vec![[].to_vec()];
     let mut index:usize = 0;

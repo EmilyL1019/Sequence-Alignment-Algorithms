@@ -1,9 +1,25 @@
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum Direction {
+    Diagonal,
+    Up,
+    Left,
+    DiagonalUp,
+    DiagonalLeft,
+    UpLeft,
+    DiagonalUpLeft,
+    None
+}
+
+struct ImportantExcerpt<'a> {
+    part: &'a str,
+}
+
 // Creates grid from user entered sequences
-pub fn create_grid<'a>(mut seq1: &'a mut String, mut seq2: &'a mut String, len1: i32, len2: i32) -> (Vec<i32>, Vec<String>) {
+pub fn create_grid<'a>(mut seq1: &'a mut String, mut seq2: &'a mut String, len1: i32, len2: i32) -> (Vec<i32>, Vec<Direction>) {
     // Create new vec and set up row and column labels
-    let mut score_grid:Vec<i32>= Vec::new();
+    let mut score_grid: Vec<i32> = Vec::new();
     let total_cells = (len1 + 1) * (len2 + 1);
-    let mut directions:Vec<String> = Vec::new();
+    let mut directions:Vec<Direction> = Vec::new();
     for _ in 0..total_cells {
         score_grid.push(0);
     }
@@ -32,7 +48,7 @@ pub fn create_grid<'a>(mut seq1: &'a mut String, mut seq2: &'a mut String, len1:
 }
 
 // Returns direction of the best score for a given cell
-fn max_cell_score<'a>(seq1: &'a mut String, seq2: &'a mut String, score_grid: &'a mut Vec<i32>, cell: &'a i32, directions: &'a mut Vec<String>) -> &'a mut Vec<String> {
+fn max_cell_score<'a>(seq1: &'a mut String, seq2: &'a mut String, score_grid: &'a mut Vec<i32>, cell: &'a i32, directions: &'a mut Vec<Direction>) -> &'a mut Vec<Direction> {
     // determine if location is a match
     let seq1_char_index = ((cell - (cell % ((seq2.len() + 1) as i32))) / (seq2.len() + 1) as i32 - 1) as usize;
     let seq2_char_index = (cell % (seq2.len() + 1) as i32 - 1) as usize;
@@ -51,29 +67,33 @@ fn max_cell_score<'a>(seq1: &'a mut String, seq2: &'a mut String, score_grid: &'
     let from_diagonal:i32 = score_grid[(cell - (seq2.len() + 1) as i32 - 1) as usize] + match_point;
     // Find best score
     // Save best directions for each cell
-    let mut current_direction = String::new();
-    if from_above >= from_left {
-        if from_above >= from_diagonal {
-            score_grid[*cell as usize] = from_above; 
-            current_direction += "U";
-        }
-        if from_above <= from_diagonal {
-            score_grid[*cell as usize] = from_diagonal;
-            current_direction += "D";
-        }
+    if (from_diagonal > from_left) && (from_diagonal > from_above) {
+        directions.push(Direction::Diagonal);
+        score_grid[*cell as usize] = from_diagonal;
     }
-    if from_above <= from_left {
-        if from_left >= from_diagonal{
-            score_grid[*cell as usize] = from_left; 
-            current_direction += "L";        
-        }
-        if from_left <= from_diagonal {
-            score_grid[*cell as usize] = from_diagonal;
-            if !(current_direction.contains("D")) {
-                current_direction += "D";
-            }
-        }
+    else if (from_above > from_left) && (from_above > from_diagonal) {
+        directions.push(Direction::Up);
+        score_grid[*cell as usize] = from_above;
     }
-    directions.push(current_direction);
+    else if (from_left > from_above) && (from_left > from_diagonal) {
+        directions.push(Direction::Left);
+        score_grid[*cell as usize] = from_left;
+    }
+    else if (from_above > from_left) && (from_above == from_diagonal) {
+        directions.push(Direction::DiagonalUp);
+        score_grid[*cell as usize] = from_diagonal;
+    }
+    else if (from_left > from_above) && (from_left == from_diagonal) {
+        directions.push(Direction::DiagonalLeft);
+        score_grid[*cell as usize] = from_diagonal;
+    }
+    else if (from_above == from_left) && (from_above > from_diagonal) {
+        directions.push(Direction::UpLeft);
+        score_grid[*cell as usize] = from_above;
+    }
+    else {
+        directions.push(Direction::DiagonalUpLeft);
+        score_grid[*cell as usize] = from_diagonal;  
+    }
     return directions;
 }
