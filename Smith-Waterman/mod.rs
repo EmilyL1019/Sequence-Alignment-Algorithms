@@ -17,6 +17,7 @@ pub fn align(mut seq1: String, mut seq2: String) {
 
 #[cfg(test)]
 mod tests {
+    use crate::Smith_Waterman::grid::Direction;
     use crate::Smith_Waterman::grid::create_grid;
     use crate::Smith_Waterman::alignment::build_best_alignment;
     use crate::Smith_Waterman::alignment::highest_cell;
@@ -37,17 +38,17 @@ mod tests {
         0, 0, 1, 3, 2, 1, 0, 1, 3, 3, 2,
         0, 0, 1, 2, 2, 1, 0, 0, 2, 2, 2
         ];
-        let directions:Vec<String> = vec!["L".to_string(), "L".to_string(), "L".to_string(), "L".to_string(), "L".to_string(), "L".to_string(), "L".to_string(), "L".to_string(), "L".to_string(), "L".to_string(),
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), 
-        "U".to_string(), "UDL".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), 
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "L".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "D".to_string(), "UDL".to_string(), 
-        "U".to_string(), "D".to_string(), "UDL".to_string(), "U".to_string(), "D".to_string(), "LD".to_string(), "L".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), 
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "U".to_string(), "D".to_string(), "D".to_string(), "LD".to_string(), "L".to_string(), "UDL".to_string(), "U".to_string(), 
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "U".to_string(), "UD".to_string(), "D".to_string(), "D".to_string(), "L".to_string(), "L".to_string(), "L".to_string(),
-        "U".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "D".to_string(), "U".to_string(), "U".to_string(), "D".to_string(), "LD".to_string(), "D".to_string(),
-        "U".to_string(), "UDL".to_string(), "D".to_string(), "L".to_string(), "UDL".to_string(), "U".to_string(), "UD".to_string(), "U".to_string(), "UD".to_string(), "D".to_string(), "U".to_string(),
-        "U".to_string(), "UDL".to_string(), "U".to_string(), "D".to_string(), "L".to_string(), "L".to_string(), "UDL".to_string(), "U".to_string(), "D".to_string(), "D".to_string(), "L".to_string(), 
-        "U".to_string(), "UDL".to_string(), "D".to_string(), "U".to_string(), "D".to_string(), "LD".to_string(), "UDL".to_string(), "UDL".to_string(), "U".to_string(), "UD".to_string(), "D".to_string()
+        let directions:Vec<Direction> = vec![Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, 
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Left, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Diagonal, Direction::DiagonalUpLeft, 
+        Direction::Up, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::Up, Direction::Diagonal, Direction::DiagonalLeft, Direction::Left, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Up, Direction::Diagonal, Direction::Diagonal, Direction::DiagonalLeft, Direction::Left, Direction::DiagonalUpLeft, Direction::Up,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::Diagonal, Direction::Left, Direction::Left, Direction::Left,
+        Direction::Up, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Diagonal, Direction::Up, Direction::Up, Direction::Diagonal, Direction::DiagonalLeft, Direction::Diagonal, 
+        Direction::Up, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Left, Direction::DiagonalUpLeft, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::Up,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::Up, Direction::Diagonal, Direction::Left, Direction::Left, Direction::DiagonalUpLeft, Direction::Up, Direction::Diagonal, Direction::Diagonal, Direction::Left,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Up, Direction::Diagonal, Direction::DiagonalLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Up, Direction::DiagonalUp, Direction::Diagonal
         ];
         let mut seq1 : String = "GTCAGGATCT".to_string();
         let mut seq2 : String = "ATCAAGGCCA".to_string();
@@ -57,7 +58,7 @@ mod tests {
             assert_eq!(grid[i], ftn_grid[i]);
         }
         // Check directions
-        for i in 0..119 {
+         for i in 0..119 {
             assert_eq!(directions[i], ftn_directions[i]);
         }
         let high_cell = highest_cell(&ftn_grid);
@@ -82,16 +83,17 @@ mod tests {
         0, 0, 0, 1, 0, 0,
         0, 0, 0, 0, 2, 1,
         ];
-        let directions:Vec<String> = vec!["L".to_string(), "L".to_string(), "L".to_string(), "L".to_string(), "L".to_string(),
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "D".to_string(),
-        "U".to_string(), "UDL".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(),
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "L".to_string(), "UDL".to_string(),
-        "U".to_string(), "D".to_string(), "UDL".to_string(), "U".to_string(), "D".to_string(), "UDL".to_string(),
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "D".to_string(), 
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "U".to_string(), "UD".to_string(),
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), 
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "LD".to_string()];
-        let mut seq1 : String = "ATGCAGGAn".to_string();
+        let directions:Vec<Direction> = vec![Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, 
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Diagonal, 
+        Direction::Up, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, 
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Left, Direction::DiagonalUpLeft, 
+        Direction::Up, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::Up, Direction::Diagonal, Direction::DiagonalUpLeft, 
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Diagonal,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Up, Direction::DiagonalUp,  
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalLeft  
+        ];
+        let mut seq1 : String = "ATGCAGGA".to_string();
         let mut seq2 : String = "CTGAA".to_string();
         let (ftn_grid, ftn_directions) = create_grid(&mut seq1, &mut seq2, 8, 5);
         // Check values
@@ -135,27 +137,27 @@ mod tests {
         0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 3, 2, 2, 2, 2, 2,
         0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 2, 2, 1, 1, 1, 1,
         ];
-        let directions:Vec<String> = vec!["L".to_string(), "L".to_string(), "L".to_string(), "L".to_string(), "L".to_string(), "L".to_string(), "L".to_string(), "L".to_string(), "L".to_string(), "L".to_string(),  "L".to_string(), "L".to_string(), "L".to_string(), "L".to_string(), "L".to_string(),
-        "U".to_string(), "UDL".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(),
-        "U".to_string(), "UDL".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "D".to_string(), "L".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(),
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "LD".to_string(), "UDL".to_string(), "U".to_string(), "D".to_string(), "L".to_string(), "L".to_string(), "D".to_string(), "UDL".to_string(),
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), "U".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), "U".to_string(), "D".to_string(), "D".to_string(), "L".to_string(), "D".to_string(), 
-        "U".to_string(), "UDL".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "LD".to_string(), "U".to_string(), "UD".to_string(), "U".to_string(), "D".to_string(), "UDL".to_string(),
-        "U".to_string(), "UDL".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), "UD".to_string(), "D".to_string(), "L".to_string(), "L".to_string(), "U".to_string(), "UD".to_string(), "D".to_string(),
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "LD".to_string(), "UDL".to_string(), "U".to_string(), "D".to_string(), "L".to_string(), "L".to_string(), "D".to_string(), "L".to_string(),
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UD".to_string(), "D".to_string(), "L".to_string(), "UL".to_string(), "UD".to_string(), "D".to_string(), "LD".to_string(), "D".to_string(), "L".to_string(),
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "U".to_string(), "D".to_string(), "LD".to_string(), "U".to_string(), "UD".to_string(), "D".to_string(), "L".to_string(), "D".to_string(),
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "UD".to_string(), "UD".to_string(), "D".to_string(), "D".to_string(), "UDL".to_string(), "U".to_string(), "D".to_string(), "L".to_string(),
-        "U".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "U".to_string(), "D".to_string(), "UL".to_string(), "U".to_string(), "D".to_string(),
-        "U".to_string(), "UDL".to_string(), "D".to_string(), "L".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "L".to_string(), "UDL".to_string(), "D".to_string(), "D".to_string(), "UDL".to_string(), "U".to_string(), "D".to_string(), "U".to_string(), "UD".to_string(),
-        "U".to_string(), "UDL".to_string(), "U".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), "U".to_string(), "D".to_string(), "LD".to_string(), "L".to_string(), "UDL".to_string(), "D".to_string(), "UL".to_string(), "UD".to_string(), "D".to_string(), "UDL".to_string(),
-        "U".to_string(), "UDL".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "U".to_string(), "D".to_string(), "D".to_string(), "LD".to_string(), "UL".to_string(), "D".to_string(), "UDL".to_string(), "U".to_string(), "D".to_string(),
-        "U".to_string(), "UDL".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "U".to_string(), "UD".to_string(), "D".to_string(), "D".to_string(), "L".to_string(), "L".to_string(), "L".to_string(), "U".to_string(), "UD".to_string(),
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "LD".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "U".to_string(), "U".to_string(), "D".to_string(), "LD".to_string(), "D".to_string(), "L".to_string(), "D".to_string(),
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "U".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "D".to_string(), "U".to_string(), "U".to_string(), "D".to_string(), "L".to_string(), "UL".to_string(), "D".to_string(), "L".to_string(),
-        "U".to_string(), "UDL".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "D".to_string(), "U".to_string(), "D".to_string(), "LD".to_string(), "U".to_string(), "D".to_string(),
-        "U".to_string(), "UDL".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), "UD".to_string(), "D".to_string(), "UL".to_string(), "UD".to_string(), "D".to_string(), "U".to_string(), "UD".to_string(),
-        "U".to_string(), "UDL".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "UD".to_string(), "D".to_string(), "UDL".to_string(), "UD".to_string(), "UD".to_string(), "UD".to_string()
+        let directions:Vec<Direction> = vec![Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Diagonal, Direction::Left, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalLeft, Direction::DiagonalUpLeft, Direction::Up, Direction::Diagonal, Direction::Left, Direction::Left, Direction::Diagonal, Direction::DiagonalUpLeft,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Up, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Up, Direction::Diagonal, Direction::Diagonal, Direction::Left, Direction::Diagonal,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalLeft, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::Diagonal, Direction::DiagonalUpLeft,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUp, Direction::Diagonal, Direction::Left, Direction::Left, Direction::Up, Direction::DiagonalUp, Direction::Diagonal,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalLeft, Direction::DiagonalUpLeft, Direction::Up, Direction::Diagonal, Direction::Left, Direction::Left, Direction::Diagonal, Direction::Left, 
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUp, Direction::Diagonal, Direction::Left, Direction::UpLeft, Direction::DiagonalUp, Direction::Diagonal, Direction::DiagonalLeft, Direction::Diagonal, Direction::Left,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Up, Direction::Diagonal, Direction::DiagonalLeft, Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::Left, Direction::Diagonal,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Diagonal, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::Up, Direction::Diagonal, Direction::Left,
+        Direction::Up, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Up, Direction::Diagonal, Direction::UpLeft, Direction::Up, Direction::Diagonal,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Left, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Left, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::Up, Direction::Diagonal, Direction::Up, Direction::DiagonalUp, 
+        Direction::Up, Direction::DiagonalUpLeft, Direction::Up, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Up, Direction::Diagonal, Direction::DiagonalLeft, Direction::Left, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::UpLeft, Direction::DiagonalUp, Direction::Diagonal, Direction::DiagonalUpLeft,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Up, Direction::Diagonal, Direction::Diagonal, Direction::DiagonalLeft, Direction::UpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::Up, Direction::Diagonal, 
+        Direction::Up, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::Diagonal, Direction::Left, Direction::Left, Direction::Left, Direction::Up, Direction::DiagonalUp, 
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Up, Direction::Up, Direction::Diagonal, Direction::DiagonalLeft, Direction::Diagonal, Direction::Left, Direction::Diagonal, 
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Up, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Diagonal, Direction::Up, Direction::Up, Direction::Diagonal, Direction::Left, Direction::UpLeft, Direction::Diagonal, Direction::Left, 
+        Direction::Up, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Diagonal, Direction::Up, Direction::Diagonal, Direction::DiagonalLeft, Direction::Up, Direction::Diagonal,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUp, Direction::Diagonal, Direction::UpLeft, Direction::DiagonalUp, Direction::Diagonal, Direction::Up, Direction::DiagonalUp, 
+        Direction::Up, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUp, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUp, Direction::DiagonalUp, Direction::DiagonalUp
         ];
         let mut seq1 : String = "AAGTAAGGTGCAGAATGAAA".to_string();
         let mut seq2 : String = "CATTCAGGAAGCTGT".to_string();
@@ -167,6 +169,7 @@ mod tests {
         // Check directions
         for i in 0..334 {
             assert_eq!(directions[i], ftn_directions[i]);
+            
         }   
         let high_cell = highest_cell(&ftn_grid);
         assert_eq!(high_cell, vec![174]);
@@ -189,13 +192,13 @@ mod tests {
         0, 0, 0, 0, 0, 1, 0, 1, 1, 0,
         0, 0, 0, 1, 1, 0, 0, 0, 0, 0
         ];
-        let directions:Vec<String> = vec!["L".to_string(), "L".to_string(), "L".to_string(), "L".to_string(), "L".to_string(), "L".to_string(), "L".to_string(), "L".to_string(), "L".to_string(),
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(),
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(),
-        "U".to_string(), "D".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "UDL".to_string(), "D".to_string(), "D".to_string(),
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "L".to_string(), "UDL".to_string(),
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "UDL".to_string(), "U".to_string(), "D".to_string(), "UDL".to_string(),
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(),
+        let directions:Vec<Direction> = vec![Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, 
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, 
+        Direction::Up, Direction::Diagonal, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Diagonal, 
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Left, Direction::DiagonalUpLeft,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::Up, Direction::Diagonal, Direction::DiagonalUpLeft, 
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft
         ];
         let mut seq1 : String = "TGACTG".to_string();
         let mut seq2 : String = "AAGGTACAA".to_string();
@@ -219,7 +222,7 @@ mod tests {
         assert_eq!(score, 2);
     }
 
-    #[test]
+     #[test]
     fn test5() {
         let grid = vec![0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 1, 0, 0, 0,
@@ -232,16 +235,16 @@ mod tests {
         0, 0, 0, 0, 1, 0, 0,
         0, 0, 0, 0, 0, 2, 1,
         ];
-        let directions:Vec<String> = vec!["L".to_string(), "L".to_string(), "L".to_string(), "L".to_string(), "L".to_string(), "L".to_string(),
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(),
-        "U".to_string(), "D".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(),
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(),
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "L".to_string(),
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "U".to_string(), "D".to_string(), 
-        "U".to_string(), "D".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(),
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "U".to_string(), 
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), 
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "L".to_string()
+        let directions:Vec<Direction> = vec![Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft,
+        Direction::Up, Direction::Diagonal, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, 
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Left, 
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Up, Direction::Diagonal, 
+        Direction::Up, Direction::Diagonal, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, 
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, 
+        Direction::Up, Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, 
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Left
         ];
         let mut seq1 : String = "CTAGATGAG".to_string();
         let mut seq2 : String = "TTCAGT".to_string();
@@ -265,7 +268,7 @@ mod tests {
         assert_eq!(score, 2);
     }
 
-    #[test]
+     #[test]
     fn test6() {
         let grid = vec![0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 1, 0, 0, 0,
@@ -276,14 +279,14 @@ mod tests {
         0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 1, 0, 0, 0
         ];
-        let directions:Vec<String> = vec!["L".to_string(), "L".to_string(), "L".to_string(), "L".to_string(), "L".to_string(), "L".to_string(), "L".to_string(), "L".to_string(),
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(),
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(),
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(),
-        "U".to_string(), "D".to_string(), "D".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "UDL".to_string(), "D".to_string(),
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(),
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(),
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "D".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(),
+        let directions:Vec<Direction> = vec![Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft,
+        Direction::Up, Direction::Diagonal, Direction::Diagonal, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::Diagonal,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft
         ];
         let mut seq1 : String = "TTGATGT".to_string();
         let mut seq2 : String = "AAACTACA".to_string();
@@ -302,10 +305,8 @@ mod tests {
         let (aligned_seq1, aligned_seq2) = build_best_alignment(&ftn_grid, &ftn_directions, high_cell, &mut seq1, &mut seq2);
         let score = score(&aligned_seq1, &aligned_seq2);
         print_alignments(&aligned_seq1, &aligned_seq2, score);
-        assert_eq!(aligned_seq1, vec!["T", "T", "A", "A", "A", 
-        "A", "A", "T", "T"]);
-        assert_eq!(aligned_seq2, vec!["T", "T", "A", "A", "A", 
-        "A", "A", "T", "T"]);
+        assert_eq!(aligned_seq1, vec!["T", "T", "A", "A", "A", "A", "A", "T", "T"]);
+        assert_eq!(aligned_seq2, vec!["T", "T", "A", "A", "A", "A", "A", "T", "T"]);
         assert_eq!(score, 1);
     }
 
@@ -318,12 +319,12 @@ mod tests {
         0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0
         ];
-        let directions:Vec<String> = vec!["L".to_string(), "L".to_string(), "L".to_string(), "L".to_string(), "L".to_string(), 
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(),
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(),
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(),
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(),
-        "U".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string(), "UDL".to_string()
+        let directions:Vec<Direction> = vec![Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft
         ];
         let mut seq1 : String = "TTTTT".to_string();
         let mut seq2 : String = "AAAAA".to_string();
