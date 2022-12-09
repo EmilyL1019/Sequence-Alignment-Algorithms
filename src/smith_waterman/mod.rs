@@ -1,6 +1,9 @@
 // Adapted from Needleman_Wunsch program on GitHub
 mod grid;
 mod alignment;
+
+use clam::prelude::*;
+
 pub fn align(mut seq1: String, mut seq2: String) {
     // Get the length
     let len1 = seq1.len() as i32;
@@ -15,14 +18,31 @@ pub fn align(mut seq1: String, mut seq2: String) {
         
 }
 
+#[derive(Debug)]
+pub struct SmithWaterman {}
+
+impl<T: Number, U: Number> Metric<T, U> for SmithWaterman {
+    fn name(&self) -> String {
+        "SmithWaterman".to_string()
+    }
+
+    fn one_to_one(&self, x: &[T], y: &[T]) -> U {
+        todo!()
+    }
+
+    fn is_expensive(&self) -> bool {
+        true
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::Smith_Waterman::grid::Direction;
-    use crate::Smith_Waterman::grid::create_grid;
-    use crate::Smith_Waterman::alignment::build_best_alignment;
-    use crate::Smith_Waterman::alignment::highest_cell;
-    use crate::Smith_Waterman::alignment::print_alignments;
-    use crate::Smith_Waterman::alignment::score;
+    use crate::smith_waterman::grid::Direction;
+    use crate::smith_waterman::grid::create_grid;
+    use crate::smith_waterman::alignment::build_best_alignment;
+    use crate::smith_waterman::alignment::highest_cell;
+    use crate::smith_waterman::alignment::print_alignments;
+    use crate::smith_waterman::alignment::score;
     #[test]
     fn test1() {
         let grid: Vec<i32> = vec![

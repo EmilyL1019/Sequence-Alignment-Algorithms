@@ -16,12 +16,12 @@ pub fn align(mut seq1: String, mut seq2: String) -> (Vec<String>, Vec<String>, i
 
 #[cfg(test)]
 mod tests {
-    use crate::Needleman_Wunsch::grid::create_grid;
-    use crate::Needleman_Wunsch::grid::Direction;
-    use crate::Needleman_Wunsch::alignment::build_best_alignment;
-    use crate::Needleman_Wunsch::alignment::print_alignments;
-    use crate::Needleman_Wunsch::alignment::score;
-    use crate::Needleman_Wunsch::align;
+    use crate::needleman_wunsch::grid::create_grid;
+    use crate::needleman_wunsch::grid::Direction;
+    use crate::needleman_wunsch::alignment::build_best_alignment;
+    use crate::needleman_wunsch::alignment::print_alignments;
+    use crate::needleman_wunsch::alignment::score;
+    use crate::needleman_wunsch::align;
     #[test]
     fn test1() {
         let grid: Vec<i32> = vec![0, -1, -2, -3, -4, -5, -6, -7, -8, -9, -10,

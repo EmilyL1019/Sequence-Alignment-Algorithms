@@ -1,5 +1,4 @@
-mod Needleman_Wunsch;
-mod Smith_Waterman;
+
 use std::env;
 
 fn main() {
@@ -8,10 +7,10 @@ fn main() {
     let seq1 = &args[2];
     let seq2= &args[3];
     if algorithm == "Needleman-Wunsch" {
-        Needleman_Wunsch::align(seq1.to_string(), seq2.to_string());
+        algorithms_lib::needleman_wunsch::align(seq1.to_string(), seq2.to_string());
     }
     else if algorithm == "Smith-Waterman" {
-        Smith_Waterman::align(seq1.to_string(), seq2.to_string());
+        algorithms_lib::smith_waterman::align(seq1.to_string(), seq2.to_string());
     }
     else {
         println!("Algorithm is unknown. Please run program again!");

@@ -6,5 +6,6 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-Needleman_Wunsch = { path = "../Needleman_Wunsch"}
-Smith_Waterman = { path = "../Smith_Waterman" }
+clam = { git = "https://github.com/URI-ABD/clam", branch = "rust" }
+# Needleman_Wunsch = { path = "../Needleman_Wunsch"}
+# Smith_Waterman = { path = "../Smith_Waterman" }
