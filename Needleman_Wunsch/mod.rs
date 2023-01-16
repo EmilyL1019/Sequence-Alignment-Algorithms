@@ -1,6 +1,8 @@
 mod grid;
 mod alignment;
-// ToDo:s
+
+use clam::prelude::*;
+
 pub fn align(mut seq1: String, mut seq2: String) -> (Vec<String>, Vec<String>, i32){
     // Get the length
     let len1 = seq1.len() as i32;
@@ -14,8 +16,54 @@ pub fn align(mut seq1: String, mut seq2: String) -> (Vec<String>, Vec<String>, i
     return (aligned_seq1, aligned_seq2, score); 
 }
 
+/* first convert seq1 and seq2 to string
+call all alignment ftn
+convert answer to u8 */
+/* If they just want the score, I'll call score in the ftn,
+convert score to u8, return score*/
+pub fn clamAlign(mut seq1: String, mut seq2: String) -> u8{
+    // Convert seq1 and seq2 to string
+    // Align
+    let aligned_seq1: Vec<String>;
+    let aligned_seq2: Vec<String>;
+    let score: i32;
+    (aligned_seq1, aligned_seq2, score) = align(seq1, seq2);
+    alignment::print_alignments(&aligned_seq1, &aligned_seq2, score);
+    return score as u8;
+}
+
+#[derive(Debug)]
+pub struct NeedlemanWunsch {}
+
+impl <T: Number, U: Number> Metric<T, U> for NeedlemanWunsch {
+    fn name(&self) -> String {
+        "NeedlemanWunsch".to_string()
+    }
+
+    fn one_to_one(&self, x: &[T], y: &[T]) -> U {
+        /* try
+        convert x and y to vec of u8
+        in align convert x and y to string
+            convert answer to u8s?
+        */
+        let xu = x.to_owned().as_bytes();
+        let yu = y.to_owned();
+        let xStr:String = String::from_utf8(xu).unwrap();
+        let yStr:String = String::from_utf8(yu).unwrap();
+        //let yStr = y.to_string();
+        //let score = clamAlign(xStr, yStr);
+        U::from(score).unwrap()
+    }
+
+    fn is_expensive(&self) -> bool {
+        true        
+    }
+}
+
 #[cfg(test)]
 mod tests {
+    use clam::metric_from_name;
+
     use crate::Needleman_Wunsch::grid::create_grid;
     use crate::Needleman_Wunsch::grid::Direction;
     use crate::Needleman_Wunsch::alignment::build_best_alignment;
@@ -435,5 +483,15 @@ mod tests {
         assert_eq!(aligned_seq1, vec!["AAAAA"]);
         assert_eq!(aligned_seq2, vec!["TTTTT"]);
         assert_eq!(score, -5);
+    }
+
+    #[test]
+    fn struct_test1() {
+        let mut seq1 : String = "GTCAGGATCT".to_string();
+        let mut seq2 : String = "ATCAAGGCCA".to_string();
+        let metric = metric_from_name("NeeedlemanWunsch").unwrap();
+        let slice1 = seq1.as_bytes()
+        let slice2 = seq2.as_bytes()
+        metric.one_to_one(slice1, slice2);
     }
 }
