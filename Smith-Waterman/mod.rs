@@ -1,7 +1,10 @@
 // Adapted from Needleman_Wunsch program on GitHub
 mod grid;
 mod alignment;
-pub fn align(mut seq1: String, mut seq2: String) {
+
+use clam::prelude::*;
+
+pub fn align(mut seq1: String, mut seq2: String) -> (Vec<String>, Vec<String>, i32){
     // Get the length
     let len1 = seq1.len() as i32;
     let len2 = seq2.len() as i32;
@@ -12,8 +15,41 @@ pub fn align(mut seq1: String, mut seq2: String) {
     let (aligned_seq1, aligned_seq2) = alignment::build_best_alignment(&grid, &directions, high_cell, &mut seq1, &mut seq2);
     let score = alignment::score(&aligned_seq1, &aligned_seq2);
     alignment::print_alignments(&aligned_seq1, &aligned_seq2, score);
-        
+    return (aligned_seq1, aligned_seq2, score); 
 }
+
+pub fn clam_align(mut seq1: String, mut seq2: String) -> u8{
+    // Convert seq1 and seq2 to string
+    // Align
+    let aligned_seq1: Vec<String>;
+    let aligned_seq2: Vec<String>;
+    let score: i32;
+    (aligned_seq1, aligned_seq2, score) = align(seq1, seq2);
+    alignment::print_alignments(&aligned_seq1, &aligned_seq2, score);
+    return score as u8;
+}
+
+#[derive(Debug)]
+pub struct SmithWaterman {}
+
+    impl <T: Number, U: Number> Metric<T, U> for SmithWaterman {
+        fn name(&self) -> String {
+            "SmithWaterman".to_string()
+        }
+
+        fn one_to_one(&self, x: &[T], y: &[T]) -> U {
+            let xu = x.iter().map(|v| v.to_be_bytes()[0]).collect();
+            let yu = y.iter().map(|v| v.to_be_bytes()[0]).collect();
+            let x_str:String = String::from_utf8(xu).unwrap();
+            let y_str:String = String::from_utf8(yu).unwrap();
+            let score = clam_align(x_str, y_str);
+            U::from(score).unwrap()
+        }
+
+        fn is_expensive(&self) -> bool {
+            true
+        }
+    }
 
 #[cfg(test)]
 mod tests {
@@ -23,6 +59,7 @@ mod tests {
     use crate::Smith_Waterman::alignment::highest_cell;
     use crate::Smith_Waterman::alignment::print_alignments;
     use crate::Smith_Waterman::alignment::score;
+    
     #[test]
     fn test1() {
         let grid: Vec<i32> = vec![
