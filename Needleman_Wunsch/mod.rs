@@ -46,12 +46,12 @@ impl <T: Number, U: Number> Metric<T, U> for NeedlemanWunsch {
         in align convert x and y to string
             convert answer to u8s?
         */
-        let xu = x.to_owned().as_bytes();
-        let yu = y.to_owned();
+        let xu = x.iter().map(|v| v.to_be_bytes()[0]).collect();
+        let yu = y.iter().map(|v| v.to_be_bytes()[0]).collect();
         let xStr:String = String::from_utf8(xu).unwrap();
         let yStr:String = String::from_utf8(yu).unwrap();
         //let yStr = y.to_string();
-        //let score = clamAlign(xStr, yStr);
+        let score = clamAlign(xStr, yStr);
         U::from(score).unwrap()
     }
 
