@@ -3,6 +3,10 @@ mod alignment;
 
 use clam::prelude::*;
 
+struct ImportantExcerpt<'a> {
+    part: &'a str,
+}
+
 pub fn align(mut seq1: String, mut seq2: String) -> (Vec<String>, Vec<String>, i32){
     // Get the length
     let len1 = seq1.len() as i32;
@@ -16,30 +20,49 @@ pub fn align(mut seq1: String, mut seq2: String) -> (Vec<String>, Vec<String>, i
     return (aligned_seq1, aligned_seq2, score); 
 }
 
+// Duplicate of align without print
+pub fn align_no_print(mut seq1: String, mut seq2: String) -> i32{
+    // Get the length
+    let len1 = seq1.len() as i32;
+    let len2 = seq2.len() as i32;
+    // Create the grid
+    let (grid, directions) = grid::create_grid(&mut seq1, &mut seq2, len1, len2);
+    // Build and print alignment
+    let (aligned_seq1, aligned_seq2) = alignment::build_best_alignment(&grid, &directions, len1 * len2 - 1, &mut seq1, &mut seq2);
+    let score = alignment::score(&aligned_seq1[0], &aligned_seq2[0]);
+    return score;
+}
+
 /* first convert seq1 and seq2 to string
 call all alignment ftn
 convert answer to u8 */
 /* If they just want the score, I'll call score in the ftn,
 convert score to u8, return score*/
-pub fn clam_align(mut seq1: String, mut seq2: String) -> u8{
+pub fn clam_align(seq1: String, seq2: String) -> i8{
     // Convert seq1 and seq2 to string
     // Align
-    let aligned_seq1: Vec<String>;
-    let aligned_seq2: Vec<String>;
-    let score: i32;
-    (aligned_seq1, aligned_seq2, score) = align(seq1, seq2);
-    alignment::print_alignments(&aligned_seq1, &aligned_seq2, score);
-    return score as u8;
+    return align_no_print(seq1, seq2) as i8;
 }
 
 #[derive(Debug)]
-pub struct NeedlemanWunsch {}
+/// Implements Needleman-Wunsch sequence alignments
+pub struct NeedlemanWunsch {
+    pub seq1: String,
+    pub seq2: String
+}
 
 impl <T: Number, U: Number> Metric<T, U> for NeedlemanWunsch {
+    /// Returns name of distance function
     fn name(&self) -> String {
         "NeedlemanWunsch".to_string()
     }
 
+    /// Returns score of best Needleman Wunsch alignment
+    /// 
+    /// # Arguments
+    /// 
+    /// * 'x' - An array of a unknown type representing the first sequence
+    /// * 'y' - An array of a unknown type representing the second sequence
     fn one_to_one(&self, x: &[T], y: &[T]) -> U {
         /* try
         convert x and y to vec of u8
@@ -54,6 +77,7 @@ impl <T: Number, U: Number> Metric<T, U> for NeedlemanWunsch {
         U::from(score).unwrap()
     }
 
+    /// Returns boolean indictating if this distance function is expensive
     fn is_expensive(&self) -> bool {
         true        
     }
@@ -61,14 +85,19 @@ impl <T: Number, U: Number> Metric<T, U> for NeedlemanWunsch {
 
 #[cfg(test)]
 mod tests {
-    use clam::metric::metric_from_name;
-
-    use crate::Needleman_Wunsch::grid::create_grid;
+    use clam::Metric;
     use crate::Needleman_Wunsch::grid::Direction;
+    use crate::Needleman_Wunsch::grid::create_grid;
     use crate::Needleman_Wunsch::alignment::build_best_alignment;
     use crate::Needleman_Wunsch::alignment::print_alignments;
     use crate::Needleman_Wunsch::alignment::score;
     use crate::Needleman_Wunsch::align;
+    use super::NeedlemanWunsch;
+
+    struct ImportantExcerpt<'a> {
+        part: &'a str,
+    }
+   
     #[test]
     fn test1() {
         let grid: Vec<i32> = vec![0, -1, -2, -3, -4, -5, -6, -7, -8, -9, -10,
@@ -92,8 +121,8 @@ mod tests {
         Direction::Up, Direction::Diagonal, Direction::Up, Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::Up,
         Direction::Up, Direction::Up, Direction::Diagonal, Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::Diagonal, Direction::Diagonal, Direction::Left,
         Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Diagonal];
-        let mut seq1 : String = "GTCAGGATCT".to_string();
-        let mut seq2 : String = "ATCAAGGCCA".to_string();
+        let mut seq1: String = "GTCAGGATCT".to_string();
+        let mut seq2: String = "ATCAAGGCCA".to_string();
         let (ftn_grid, ftn_directions) = create_grid(&mut seq1, &mut seq2, 10, 10);
         // Check values
         for i in 0..120 {
@@ -112,8 +141,8 @@ mod tests {
     }
     #[test]
     fn clam_ftn_test1() {
-        let seq1 : String = "GTCAGGATCT".to_string();
-        let seq2 : String = "ATCAAGGCCA".to_string();
+        let seq1: String = "GTCAGGATCT".to_string();
+        let seq2: String = "ATCAAGGCCA".to_string();
         let (aligned_seq1, aligned_seq2, score) = align(seq1, seq2);
         assert_eq!(aligned_seq1, vec!["GTC-AGGATCT", "GTCA-GGATCT", "GTC-AGGATCT", "GTCA-GGATCT"]);
         assert_eq!(aligned_seq2, vec!["ATCAAGG-CCA", "ATCAAGG-CCA", "ATCAAGGC-CA", "ATCAAGGC-CA"]);
@@ -139,8 +168,8 @@ mod tests {
         Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp,
         Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::Diagonal
         ];
-        let mut seq1 : String = "ATGCAGGA".to_string();
-        let mut seq2 : String = "CTGAA".to_string();
+        let mut seq1: String = "ATGCAGGA".to_string();
+        let mut seq2: String = "CTGAA".to_string();
         let (ftn_grid, ftn_directions) = create_grid(&mut seq1, &mut seq2, 8, 5);
         // Check values
         for i in 0..54 {
@@ -159,8 +188,8 @@ mod tests {
     }
     #[test]
     fn clam_ftn_test2() {
-        let seq1 : String = "ATGCAGGA".to_string();
-        let seq2 : String = "CTGAA".to_string();
+        let seq1: String = "ATGCAGGA".to_string();
+        let seq2: String = "CTGAA".to_string();
         let (aligned_seq1, aligned_seq2, score) = align(seq1, seq2);
         assert_eq!(aligned_seq1, vec!["ATGCAGGA"]);
         assert_eq!(aligned_seq2, vec!["CTG-A--A"]);
@@ -212,8 +241,8 @@ mod tests {
         Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::UpLeft, Direction::DiagonalUp, Direction::Diagonal, Direction::Up, Direction::DiagonalUp,
         Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp
         ];
-        let mut seq1 : String = "AAGTAAGGTGCAGAATGAAA".to_string();
-        let mut seq2 : String = "CATTCAGGAAGCTGT".to_string();
+        let mut seq1: String = "AAGTAAGGTGCAGAATGAAA".to_string();
+        let mut seq2: String = "CATTCAGGAAGCTGT".to_string();
         let (ftn_grid, ftn_directions) = create_grid(&mut seq1, &mut seq2, 20, 15);
         //  Check values
         for i in 0..335 {
@@ -243,8 +272,8 @@ mod tests {
 
    #[test]
     fn clam_ftn_test3() {
-        let seq1 : String = "AAGTAAGGTGCAGAATGAAA".to_string();
-        let seq2 : String = "CATTCAGGAAGCTGT".to_string();
+        let seq1: String = "AAGTAAGGTGCAGAATGAAA".to_string();
+        let seq2: String = "CATTCAGGAAGCTGT".to_string();
         let (aligned_seq1, aligned_seq2, score) = align(seq1, seq2);
         assert_eq!(aligned_seq1, vec!["AAGTAAGGTGCAGAATGAAA", "AAGTAAGGTGCAGAATGAAA", "AAGTAAGGTGCAGAATGAAA", "AAGTAAGGTGCAGAATGAAA", "AAGTAAGGTGCAGAATGAAA", "AAGTAAGGTGCAGAATGAAA",
         "AAGTAAGGTGCAGAATGAAA", "AAGTAAGGTGCAGAATGAAA", "AAGTAAGGTGCAGAATGAAA", "AAGTAAGGTGCAGAATGAAA", "AAGTAAGGTGCAGAATGAAA", "AAGTAAGGTGCAGAATGAAA",
@@ -277,8 +306,8 @@ mod tests {
         Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Diagonal, Direction::Diagonal, Direction::Left, Direction::Up, Direction::Diagonal, Direction::DiagonalLeft,
         Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::Diagonal, Direction::UpLeft, Direction::Diagonal, Direction::Up, Direction::DiagonalUp, Direction::Diagonal
         ];
-        let mut seq1 : String = "TGACTG".to_string();
-        let mut seq2 : String = "AAGGTACAA".to_string();
+        let mut seq1: String = "TGACTG".to_string();
+        let mut seq2: String = "AAGGTACAA".to_string();
         let (ftn_grid, ftn_directions) = create_grid(&mut seq1, &mut seq2, 6, 9);
         //  Check values
         for i in 0..69 {
@@ -299,8 +328,8 @@ mod tests {
 
     #[test]
     fn clam_ftn_test4() {
-        let seq1 : String = "TGACTG".to_string();
-        let seq2 : String = "AAGGTACAA".to_string();
+        let seq1: String = "TGACTG".to_string();
+        let seq2: String = "AAGGTACAA".to_string();
         let (aligned_seq1, aligned_seq2, score) = align(seq1, seq2);
         assert_eq!(aligned_seq1, vec!["--TG-ACTG", "-T-G-ACTG", "T--G-ACTG", "-TG--ACTG", "T-G--ACTG"]);
         assert_eq!(aligned_seq2, vec!["AAGGTACAA", "AAGGTACAA", "AAGGTACAA", "AAGGTACAA", "AAGGTACAA"]);
@@ -330,8 +359,8 @@ mod tests {
         Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::Up, Direction::Up, 
         Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::Diagonal, Direction::UpLeft
         ];
-        let mut seq1 : String = "CTAGATGAG".to_string();
-        let mut seq2 : String = "TTCAGT".to_string();
+        let mut seq1: String = "CTAGATGAG".to_string();
+        let mut seq2: String = "TTCAGT".to_string();
         let (ftn_grid, ftn_directions) = create_grid(&mut seq1, &mut seq2, 9, 6);
         //  Check values
         for i in 0..69 {
@@ -352,8 +381,8 @@ mod tests {
     
     #[test]
     fn clam_ftn_test5() {
-        let seq1 : String = "CTAGATGAG".to_string();
-        let seq2 : String = "TTCAGT".to_string();
+        let seq1: String = "CTAGATGAG".to_string();
+        let seq2: String = "TTCAGT".to_string();
         let (aligned_seq1, aligned_seq2, score) = align(seq1, seq2);
         assert_eq!(aligned_seq1, vec!["CTAGATGAG-", "CT-AGATGAG"]);
         assert_eq!(aligned_seq2, vec!["-T---TCAGT", "TTCAG-T---"]);
@@ -415,7 +444,7 @@ mod tests {
         assert_eq!(score, -6);
     }
 
-     #[test]
+    #[test]
     fn clam_ftn_test6() {
         let seq1 : String = "TTTGATGT".to_string();
         let seq2 : String = "AAACTACA".to_string();
@@ -486,11 +515,55 @@ mod tests {
 
     #[test]
     fn struct_test1() {
-        let mut seq1 : String = "GTCAGGATCT".to_string();
-        let mut seq2 = "ATCAAGGCCA";
-        let metric = metric_from_name("NeeedlemanWunsch", true).unwrap();
-        let slice1 = seq1.as_bytes();
-        let slice2 = seq2.as_bytes();
-        metric.one_to_one(slice1, slice2);
+        let seq1_c: String = "GTCAGGATCT".to_string(); 
+        let seq2_c: String = "ATCAAGGCCA".to_string();
+        let seq1: String = seq1_c.clone();
+        let seq2: String = seq2_c.clone();
+        let metric_nw: NeedlemanWunsch = NeedlemanWunsch{seq1, seq2};
+        let score:i8 = metric_nw.one_to_one(seq1_c.as_bytes(), seq2_c.as_bytes());
+        assert_eq!(score, 1 as i8);
     }
+
+    #[test]
+    fn struct_test2() {
+        let seq1_c: String = "ATGCAGGA".to_string();
+        let seq2_c: String = "CTGAA".to_string();
+        let seq1: String = seq1_c.clone();
+        let seq2: String = seq2_c.clone();
+        let metric_nw: NeedlemanWunsch = NeedlemanWunsch{seq1, seq2};
+        let score:i8 = metric_nw.one_to_one(seq1_c.as_bytes(), seq2_c.as_bytes());
+        assert_eq!(score, 0 as i8);
+    }
+
+    #[test]
+    fn struct_test3() {
+        let seq1_c: String = "AAGTAAGGTGCAGAATGAAA".to_string();
+        let seq2_c: String = "CATTCAGGAAGCTGT".to_string();
+        let seq1: String = seq1_c.clone();
+        let seq2: String = seq2_c.clone();
+        let metric_nw: NeedlemanWunsch = NeedlemanWunsch{seq1, seq2};
+        let score:i8 = metric_nw.one_to_one(seq1_c.as_bytes(), seq2_c.as_bytes());
+        assert_eq!(score, -2 as i8);
+    }
+    #[test]
+    fn struct_test4() {
+        let seq1_c: String = "TGACTG".to_string();
+        let seq2_c: String = "AAGGTACAA".to_string();
+        let seq1: String = seq1_c.clone();
+        let seq2: String = seq2_c.clone();
+        let metric_nw: NeedlemanWunsch = NeedlemanWunsch{seq1, seq2};
+        let score:i8 = metric_nw.one_to_one(seq1_c.as_bytes(), seq2_c.as_bytes());
+        assert_eq!(score, -3 as i8);
+    }
+    #[test]
+    fn struct_test5() {
+        let seq1_c: String = "CTAGATGAG".to_string();
+        let seq2_c: String = "TTCAGT".to_string();
+        let seq1: String = seq1_c.clone();
+        let seq2: String = seq2_c.clone();
+        let metric_nw: NeedlemanWunsch = NeedlemanWunsch{seq1, seq2};
+        let score:i8 = metric_nw.one_to_one(seq1_c.as_bytes(), seq2_c.as_bytes());
+        assert_eq!(score, -2 as i8);
+    }
+
 }
