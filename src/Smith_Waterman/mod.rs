@@ -12,7 +12,7 @@ pub fn align(mut seq1: String, mut seq2: String) -> (Vec<String>, Vec<String>, i
     let (grid, directions) = grid::create_grid(&mut seq1, &mut seq2, len1, len2);
     let high_cell = alignment::highest_cell(&grid);
     // Build and print alignment
-    let (aligned_seq1, aligned_seq2) = alignment::build_best_alignment(&grid, &directions, high_cell, &mut seq1, &mut seq2);
+    let (aligned_seq1, aligned_seq2) = alignment::build_best_alignment(&grid, &mut directions.clone(), high_cell, seq1.clone(), seq2.clone());
     let score = alignment::score(&aligned_seq1, &aligned_seq2);
     alignment::print_alignments(&aligned_seq1, &aligned_seq2, score);
     return (aligned_seq1, aligned_seq2, score); 
@@ -27,7 +27,7 @@ pub fn align_no_print(mut seq1: String, mut seq2: String) -> i32{
     let (grid, directions) = grid::create_grid(&mut seq1, &mut seq2, len1, len2);
     let high_cell = alignment::highest_cell(&grid);
     // Build and print alignment
-    let (aligned_seq1, aligned_seq2) = alignment::build_best_alignment(&grid, &directions, high_cell, &mut seq1, &mut seq2);
+    let (aligned_seq1, aligned_seq2) = alignment::build_best_alignment(&grid, &mut directions.clone(), high_cell, seq1, seq2);
     let score = alignment::score(&aligned_seq1, &aligned_seq2);
     return score; 
 }
@@ -81,6 +81,7 @@ mod tests {
     use crate::Smith_Waterman::alignment::score;
     use crate::Smith_Waterman::align;
     use super::SmithWaterman;
+    use super::grid;
 
     struct ImportantExcerpt<'a> {
         part: &'a str,
@@ -101,7 +102,7 @@ mod tests {
         0, 0, 1, 3, 2, 1, 0, 1, 3, 3, 2,
         0, 0, 1, 2, 2, 1, 0, 0, 2, 2, 2
         ];
-        let directions:Vec<Direction> = vec![Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, 
+        let directions:Vec<Direction> = vec![Direction::None, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, 
         Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft,
         Direction::Up, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft,
         Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Left, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Diagonal, Direction::DiagonalUpLeft, 
@@ -115,7 +116,7 @@ mod tests {
         ];
         let mut seq1 : String = "GTCAGGATCT".to_string();
         let mut seq2 : String = "ATCAAGGCCA".to_string();
-        let (ftn_grid, ftn_directions) = create_grid(&mut seq1, &mut seq2, 10, 10);
+        let (ftn_grid, mut ftn_directions) = create_grid(&mut seq1, &mut seq2, 10, 10);
         // Check values
         for i in 0..120 {
             assert_eq!(grid[i], ftn_grid[i]);
@@ -126,7 +127,7 @@ mod tests {
         }
         let high_cell = highest_cell(&ftn_grid);
         assert_eq!(high_cell, vec![73]);
-        let (aligned_seq1, aligned_seq2) = build_best_alignment(&ftn_grid, &ftn_directions, high_cell, &mut seq1, &mut seq2);
+        let (aligned_seq1, aligned_seq2) = build_best_alignment(&ftn_grid, &mut ftn_directions, high_cell, seq1, seq2);
         let score = score(&aligned_seq1, &aligned_seq2);
         print_alignments(&aligned_seq1, &aligned_seq2, score);
         assert_eq!(aligned_seq1, vec!["TC-AGG", "TCA-GG"]);
@@ -156,7 +157,7 @@ mod tests {
         0, 0, 0, 1, 0, 0,
         0, 0, 0, 0, 2, 1,
         ];
-        let directions:Vec<Direction> = vec![Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, 
+        let directions:Vec<Direction> = vec![Direction::None, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, 
         Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Diagonal, 
         Direction::Up, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, 
         Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Left, Direction::DiagonalUpLeft, 
@@ -168,7 +169,7 @@ mod tests {
         ];
         let mut seq1 : String = "ATGCAGGA".to_string();
         let mut seq2 : String = "CTGAA".to_string();
-        let (ftn_grid, ftn_directions) = create_grid(&mut seq1, &mut seq2, 8, 5);
+        let (ftn_grid, mut ftn_directions) = create_grid(&mut seq1, &mut seq2, 8, 5);
         // Check values
         for i in 0..53 {
             assert_eq!(grid[i], ftn_grid[i]);
@@ -179,7 +180,7 @@ mod tests {
         }
         let high_cell = highest_cell(&ftn_grid);
         assert_eq!(high_cell, vec![21, 34, 35, 52]);
-        let (aligned_seq1, aligned_seq2) = build_best_alignment(&ftn_grid, &ftn_directions, high_cell, &mut seq1, &mut seq2);
+        let (aligned_seq1, aligned_seq2) = build_best_alignment(&ftn_grid, &mut ftn_directions, high_cell, seq1, seq2);
         let score = score(&aligned_seq1,&aligned_seq2);
         print_alignments(&aligned_seq1, &aligned_seq2, score);
         assert_eq!(aligned_seq1, vec!["TG", "TGCA", "TGCA", "GA"]);
@@ -245,7 +246,7 @@ mod tests {
         ];
         let mut seq1 : String = "AAGTAAGGTGCAGAATGAAA".to_string();
         let mut seq2 : String = "CATTCAGGAAGCTGT".to_string();
-        let (ftn_grid, ftn_directions) = create_grid(&mut seq1, &mut seq2, 20, 15);
+        let (ftn_grid, mut ftn_directions) = create_grid(&mut seq1, &mut seq2, 20, 15);
         //  Check values
         for i in 0..335 {
             assert_eq!(grid[i], ftn_grid[i]); 
@@ -258,7 +259,7 @@ mod tests {
         let high_cell = highest_cell(&ftn_grid);
         assert_eq!(high_cell, vec![174]);
         // Create and check alignments
-        let (aligned_seq1, aligned_seq2) = build_best_alignment(&ftn_grid, &ftn_directions, high_cell, &mut seq1, &mut seq2);
+        let (aligned_seq1, aligned_seq2) = build_best_alignment(&ftn_grid, &mut ftn_directions, high_cell, seq1, seq2);
         let score = score(&aligned_seq1, &aligned_seq2);
         print_alignments(&aligned_seq1, &aligned_seq2, score);
         assert_eq!(aligned_seq1, vec!["AGTAAGGTG"]);
@@ -296,7 +297,7 @@ mod tests {
         ];
         let mut seq1 : String = "TGACTG".to_string();
         let mut seq2 : String = "AAGGTACAA".to_string();
-        let (ftn_grid, ftn_directions) = create_grid(&mut seq1, &mut seq2, 6, 9);
+        let (ftn_grid, mut ftn_directions) = create_grid(&mut seq1, &mut seq2, 6, 9);
         //  Check values
         for i in 0..69 {
             assert_eq!(grid[i], ftn_grid[i]); 
@@ -308,7 +309,7 @@ mod tests {
         let high_cell = highest_cell(&ftn_grid);
         assert_eq!(high_cell, vec![47]);
         // Create and check alignments
-        let (aligned_seq1, aligned_seq2) = build_best_alignment(&ftn_grid, &ftn_directions, high_cell, &mut seq1, &mut seq2);
+        let (aligned_seq1, aligned_seq2) = build_best_alignment(&ftn_grid, &mut ftn_directions, high_cell, seq1, seq2);
         let score = score(&aligned_seq1, &aligned_seq2);
         print_alignments(&aligned_seq1, &aligned_seq2, score);
         assert_eq!(aligned_seq1, vec!["AC"]);
@@ -352,7 +353,7 @@ mod tests {
         ];
         let mut seq1 : String = "CTAGATGAG".to_string();
         let mut seq2 : String = "TTCAGT".to_string();
-        let (ftn_grid, ftn_directions) = create_grid(&mut seq1, &mut seq2, 9, 6);
+        let (ftn_grid, mut ftn_directions) = create_grid(&mut seq1, &mut seq2, 9, 6);
         //  Check values
         for i in 0..69 {
             assert_eq!(grid[i], ftn_grid[i]); 
@@ -364,7 +365,7 @@ mod tests {
         let high_cell = highest_cell(&ftn_grid);
         assert_eq!(high_cell, vec![33, 48, 68]);
         // Create and check alignments
-        let (aligned_seq1, aligned_seq2) = build_best_alignment(&ftn_grid, &ftn_directions, high_cell, &mut seq1, &mut seq2);
+        let (aligned_seq1, aligned_seq2) = build_best_alignment(&ftn_grid, &mut ftn_directions, high_cell, seq1, seq2);
         let score = score(&aligned_seq1, &aligned_seq2);
         print_alignments(&aligned_seq1, &aligned_seq2, score);
         assert_eq!(aligned_seq1, vec!["AG", "AGAT", "AG"]);
@@ -404,7 +405,7 @@ mod tests {
         ];
         let mut seq1 : String = "TTGATGT".to_string();
         let mut seq2 : String = "AAACTACA".to_string();
-        let (ftn_grid, ftn_directions) = create_grid(&mut seq1, &mut seq2, 7, 8);
+        let (ftn_grid, mut ftn_directions) = create_grid(&mut seq1, &mut seq2, 7, 8);
         //  Check values
         for i in 0..63{
             assert_eq!(grid[i], ftn_grid[i]); 
@@ -416,7 +417,7 @@ mod tests {
         let high_cell = highest_cell(&ftn_grid);
         assert_eq!(high_cell, vec![14, 23, 37, 38, 39, 42, 44, 50, 68]);
         // Create and check alignments
-        let (aligned_seq1, aligned_seq2) = build_best_alignment(&ftn_grid, &ftn_directions, high_cell, &mut seq1, &mut seq2);
+        let (aligned_seq1, aligned_seq2) = build_best_alignment(&ftn_grid, &mut ftn_directions, high_cell, seq1, seq2);
         let score = score(&aligned_seq1, &aligned_seq2);
         print_alignments(&aligned_seq1, &aligned_seq2, score);
         assert_eq!(aligned_seq1, vec!["T", "T", "A", "A", "A", "A", "A", "T", "T"]);
@@ -452,19 +453,19 @@ mod tests {
         ];
         let mut seq1: String = "AAAAA".to_string();
         let mut seq2: String = "TTTTT".to_string();
-        let (ftn_grid, ftn_directions) = create_grid(&mut seq1, &mut seq2, 5, 5);
+        let (ftn_grid, mut ftn_directions) = create_grid(&mut seq1, &mut seq2, 5, 5);
         //  Check values
-        for i in 0..35{
+        for i in 0..36{
             assert_eq!(grid[i], ftn_grid[i]); 
         }
         // Check directions
-        for i in 0..34 {
+        for i in 0..35 {
             assert_eq!(directions[i], ftn_directions[i]);
         }
         let high_cell = highest_cell(&ftn_grid);
         assert_eq!(high_cell, vec![-1]);
         // Create and check alignments
-        let (aligned_seq1, aligned_seq2) = build_best_alignment(&ftn_grid, &ftn_directions, high_cell, &mut seq1, &mut seq2);
+        let (aligned_seq1, aligned_seq2) = build_best_alignment(&ftn_grid, &mut ftn_directions, high_cell, seq1, seq2);
         let score = score(&aligned_seq1, &aligned_seq2);
         print_alignments(&aligned_seq1, &aligned_seq2, score);
         assert_eq!(score, 0);
@@ -478,6 +479,88 @@ mod tests {
         assert_eq!(aligned_seq1, vec!["TC-AGG", "TCA-GG"]);
         assert_eq!(aligned_seq2, vec!["TCAAGG", "TCAAGG"]);
         assert_eq!(score, 4);
+    }
+
+    #[test]
+    fn test8() {
+        let grid = vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+        0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
+        0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 2,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
+        0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 2,
+        0, 1, 2, 1, 0, 1, 2, 2, 1, 0, 1,
+        0, 0, 1, 1, 0, 0, 1, 1, 1, 2, 1];
+        let directions:Vec<Direction> = vec![Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left,Direction::Left, Direction::Left,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, 
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Left,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUp, Direction::Diagonal,
+        Direction::Up, Direction::Diagonal, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Diagonal, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Up, 
+        Direction::Up, Direction::Diagonal, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Diagonal, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal,
+        Direction::Up, Direction::Diagonal, Direction::Diagonal, Direction::Left, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Diagonal, Direction::Diagonal, Direction::Left, Direction::DiagonalUpLeft, Direction::DiagonalUp,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::Up, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::Diagonal, Direction::Left
+        ];
+        let mut seq1: String = "CAGAATATTA".to_string();
+        let mut seq2: String = "TTGCTTTGAT".to_string();
+        let (ftn_grid, mut ftn_directions) = create_grid(&mut seq1, &mut seq2, 10, 10);
+        //  Check values
+        for i in 0..121{
+            assert_eq!(grid[i], ftn_grid[i]); 
+        }
+        // Check directions
+        for i in 0..120 {
+            assert_eq!(directions[i], ftn_directions[i]);
+        }
+        let high_cell = highest_cell(&ftn_grid);
+        assert_eq!(high_cell, vec![53, 76, 98, 101, 105, 106, 119]);
+        // Create and check alignments
+        let (aligned_seq1, aligned_seq2) = build_best_alignment(&ftn_grid, &mut ftn_directions, high_cell, seq1, seq2);
+        let score = score(&aligned_seq1, &aligned_seq2);
+        print_alignments(&aligned_seq1, &aligned_seq2, score);
+        assert_eq!(aligned_seq1, vec!["GA", "AT", "GAAT", "AT", "TT", "TT", "TT", "TT-A"]);
+        assert_eq!(aligned_seq2, vec!["GA", "AT", "GA-T", "AT", "TT", "TT", "TT", "TTGA"]);
+        assert_eq!(score, 2);
+    }
+
+    #[test]
+    fn test9() {
+        let grid = vec![0, 0, 0, 0, 
+        0, 1, 0, 0,
+        0, 0, 2, 1,
+        0, 0, 1, 1,
+        0, 0, 0, 2];
+        let directions:Vec<Direction> = vec![Direction::None, Direction::Left, Direction::Left, Direction::Left, 
+        Direction::Up, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, 
+        Direction::Up, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Left,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUp, Direction::Diagonal,
+        Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal
+        ];
+        let mut seq1: String = "ATTG".to_string();
+        let mut seq2: String = "ATG".to_string();
+        let (ftn_grid, mut ftn_directions) = create_grid(&mut seq1, &mut seq2, 4, 3);
+        //  Check values
+        for i in 0..20{
+            assert_eq!(grid[i], ftn_grid[i]); 
+        }
+        // Check directions
+        for i in 0..20 {
+            assert_eq!(directions[i], ftn_directions[i]);
+        }
+        let high_cell = highest_cell(&ftn_grid);
+        assert_eq!(high_cell, vec![10, 19]);
+        // Create and check alignments
+        let (aligned_seq1, aligned_seq2) = build_best_alignment(&ftn_grid, &mut ftn_directions, vec![10, 19], seq1, seq2);
+        let score = score(&aligned_seq1, &aligned_seq2);
+        print_alignments(&aligned_seq1, &aligned_seq2, score);
+        assert_eq!(aligned_seq1, vec!["AT", "TG", "ATTG"]);
+        assert_eq!(aligned_seq2, vec!["AT", "TG", "AT-G"]);
+        assert_eq!(score, 2);
     }
 
     #[test]

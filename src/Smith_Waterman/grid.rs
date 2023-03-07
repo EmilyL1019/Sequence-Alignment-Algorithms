@@ -23,7 +23,7 @@ pub fn create_grid<'a>(mut seq1: &'a mut String, mut seq2: &'a mut String, len1:
         score_grid.push(0);
     }
     // Middle sections
-    let mut i = 1;
+    let mut i = 0;
     while i < total_cells{
         directions = max_cell_score(&mut seq1, &mut seq2, &mut score_grid, &i, &mut directions).to_vec();
         i = i + 1;
@@ -34,7 +34,10 @@ pub fn create_grid<'a>(mut seq1: &'a mut String, mut seq2: &'a mut String, len1:
 // Returns direction of the best score for a given cell
 fn max_cell_score<'a>(seq1: &'a mut String, seq2: &'a mut String, score_grid: &'a mut Vec<i32>, cell: &'a i32, directions: &'a mut Vec<Direction>) -> &'a mut Vec<Direction> {
     // Assign every cell but the first in the first row with Left
-    if cell > &0 && cell <= &(seq2.len() as i32) {
+    if (cell == &0) {
+        directions.push(Direction::None);
+    }
+    else if cell <= &(seq2.len() as i32) {
         directions.push(Direction::Left);
     }
     // Assign every cell in the first column with Up
