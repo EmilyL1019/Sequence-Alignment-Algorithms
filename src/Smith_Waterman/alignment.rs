@@ -30,7 +30,6 @@ pub fn highest_cell<'a>(score_grid: &'a Vec<i32>) -> Vec<i32> {
 }
 
 fn updateDirections<'a>(directions: &'a mut Vec<Direction>, grid: &'a Vec<i32>, cell: usize, previousDirection: Direction, seq2len: usize) -> &'a mut Vec<Direction>{
-    //println!("Direction index: {}", cell);
     if (cell >= directions.len()){
         return directions;
     }
@@ -38,22 +37,22 @@ fn updateDirections<'a>(directions: &'a mut Vec<Direction>, grid: &'a Vec<i32>, 
         //println!("Diagonal");
         if directions[cell - seq2len - 2] == Direction::None || grid[cell - seq2len - 2] == 0{
             if directions[cell as usize] == Direction::DiagonalUpLeft {
-                //print!("{}: D->UL ", cell);
+                println!("{}: D->UL ", cell);
                 directions[cell as usize] = Direction::UpLeft;
-                //println!("Worked!");
+                 
             }
             else if directions[cell as usize] == Direction::DiagonalUp {
-                //print!("{}: D->U ", cell);
+                println!("{}: D->U ", cell);
                 directions[cell as usize] = Direction::Up;
-                //println!("Worked!");
+                 
             }
             else if directions[cell as usize] == Direction::DiagonalLeft {
-                //print!("{}: D->L ", cell);
+                println!("{}: D->L ", cell);
                 directions[cell as usize] = Direction::Left;
-                //println!("Worked!");
+                 
             }
             else {
-                //print!("{}: D->None ", cell);
+                println!("{}: D->None ", cell);
                 directions[cell as usize] = Direction::None;
                 if cell + 1 < grid.len() {
                     let mut directions = updateDirections(directions, grid, cell + 1, Direction::Left, seq2len);
@@ -64,38 +63,31 @@ fn updateDirections<'a>(directions: &'a mut Vec<Direction>, grid: &'a Vec<i32>, 
                         }
                     }
                 }
-                //println!("Worked!");
+                // 
             }
         }
     }
     else if (previousDirection == Direction::Left) && (directions[cell - 1] == Direction::None || grid[cell - 1] == 0) {
-        //println!("Left");
-        if directions[cell - 1] == Direction::None {
-            //println!("None L");
-        }
-        else if grid[cell - 1] == 0{
-            //println!("0 L");
-        }
         if directions[cell - 1] == Direction::None || grid[cell - 1] == 0 {
             if directions[cell as usize] == Direction::DiagonalUpLeft {
-               // print!("{}: L->DU ", cell);
+                println!("{}: L->DU ", cell);
                 directions[cell as usize] = Direction::DiagonalUp;
-                //println!("Worked!");
+                 
             }
             else if directions[cell as usize] == Direction::DiagonalLeft {
-                //print!("{}: L->D ", cell);
+                println!("{}: L->D ", cell);
                 directions[cell as usize] = Direction::Diagonal;
-                //println!("Worked!");
+                 
             }
             else if directions[cell as usize] == Direction::UpLeft {
-                //print!("{}: L->U ", cell);
+                println!("{}: L->U ", cell);
                 directions[cell as usize] = Direction::Up;
-                //println!("Worked!");
+                 
             }
             else {
-                //print!("{}: L->None ", cell);
+                println!("{}: L->None ", cell);
                 directions[cell as usize] = Direction::None;
-                if cell + 1 < grid.len() {
+                if ((cell + 1) % (seq2len + 1) > 0){
                     let mut directions = updateDirections(directions, grid, cell + 1, previousDirection, seq2len);
                     if cell + seq2len + 1 < grid.len() {
                         directions = updateDirections(directions, grid, cell + seq2len + 1, previousDirection, seq2len);
@@ -104,39 +96,32 @@ fn updateDirections<'a>(directions: &'a mut Vec<Direction>, grid: &'a Vec<i32>, 
                         }
                     }
                 }
-                //println!("Worked!");
+                 
             }
         }
     }
     else if (previousDirection == Direction::Up) && (directions[cell as usize] == Direction::None || grid[cell - seq2len] == 0) {
-        //println!("Up");
-        if directions[cell - seq2len - 1] == Direction::None {
-            //println!("None Up");
-        }
-        else if  grid[cell - seq2len - 1] == 0{
-            //println!("0 Up");
-        }
+        println!("Up");
         if directions[cell - seq2len - 1] == Direction::None || grid[cell - seq2len - 1] == 0 {
             if directions[cell as usize] == Direction::DiagonalUpLeft {
-                //print!("{}: U->DL ", cell);
+                println!("{}: U->DL ", cell);
                 directions[cell as usize] = Direction::DiagonalLeft;
-                //println!("Worked!");
+                 
             }
             else if directions[cell as usize] == Direction::DiagonalUp{
-                //print!("{}: U->D ", cell);
+                println!("{}: U->D ", cell);
                 directions[cell as usize] = Direction::Diagonal;
-                //println!("Worked!");
+                 
             }
             else if directions[cell as usize] == Direction::UpLeft{
-                //print!("{}: U->L ", cell);
+                println!("{}: U->L ", cell);
                 directions[cell as usize] = Direction::Left;
-                //println!("Worked!");
             }
             else {
-                //print!("{}: U->None ", cell);
+                println!("{}: U->None ", cell);
                 directions[cell as usize] = Direction::None;
                 if cell + 1 < grid.len() {
-                    //println!("gridlen: {}", grid.len());
+                    println!("gridlen: {}", grid.len());
                     let mut directions = updateDirections(directions, grid, cell + 1, previousDirection, seq2len);
                     if cell + seq2len + 1 < grid.len() {
                         directions = updateDirections(directions, grid, cell + seq2len + 1, previousDirection, seq2len);
@@ -145,7 +130,7 @@ fn updateDirections<'a>(directions: &'a mut Vec<Direction>, grid: &'a Vec<i32>, 
                         }
                     }
                 }
-                //println!("Worked!");
+                 
             }
         }
     }
@@ -185,7 +170,7 @@ fn priv_best_alignment<'a>(score_grid: &'a Vec<i32>, directions: &'a mut Vec<Dir
     println!("This is cell {}!", cell);
     // If the current direction index includes Diagonal, add the two corresponding characters to the sequence strings    
     if (directions[cell as usize] == Direction::Diagonal) || (directions[cell as usize] == Direction::DiagonalLeft) || (directions[cell as usize] == Direction::DiagonalUp) || (directions[cell as usize] == Direction::DiagonalUpLeft) {
-        //println!("Diagonal");
+        println!("Diagonal");
         let copy_aligned_seq1:&mut Vec<Vec<char>> = &mut new_aligned_seq1;
         let copy_aligned_seq2:&mut Vec<Vec<char>> = &mut new_aligned_seq2;
         copy_aligned_seq1[*aligned_seq_index].insert(0, seq1_char);
@@ -199,31 +184,29 @@ fn priv_best_alignment<'a>(score_grid: &'a Vec<i32>, directions: &'a mut Vec<Dir
         }
     }
     // If the current direction index includes Up, add a gap to the first sequence and the corresponding character to the second sequence 
-    else if (directions[cell as usize] == Direction::Left) || (directions[cell as usize] == Direction::UpLeft) {
-        //println!("Up");
+    else if (directions[cell as usize] == Direction::Up) || (directions[cell as usize] == Direction::UpLeft) {
+        println!("Up");
         let copy_aligned_seq1:&mut Vec<Vec<char>> = &mut new_aligned_seq1;
         let copy_aligned_seq2:&mut Vec<Vec<char>> = &mut new_aligned_seq2;
-        copy_aligned_seq1[*aligned_seq_index].insert(0, '-');
-        copy_aligned_seq2[*aligned_seq_index].insert(0, seq2_char);
-        println!("205");
+        copy_aligned_seq1[*aligned_seq_index].insert(0, seq1_char);
+        copy_aligned_seq2[*aligned_seq_index].insert(0, '-');
         let new_directions = updateDirections(directions, score_grid, cell as usize, Direction::Up, seq2.len());
         // Move to the cell to the diagonally left of the current cell
-        if (cell as i32 - 1) as i32 >= 0 && (score_grid[cell as usize] > 0) && seq1_char_index > 0 && seq2_char_index > 0{
-            priv_best_alignment(score_grid, new_directions, Direction::Left, cell - 1, seq1, seq2, copy_aligned_seq1, copy_aligned_seq2, aligned_seq_index, highcell);
+        if (cell as i32 - seq2.len() as i32 - 1) as i32 >= 0 && (score_grid[cell as usize] > 0) && seq1_char_index > 0 && seq2_char_index > 0{
+            priv_best_alignment(score_grid, new_directions, Direction::Up, cell - seq2.len() as i32 - 1, seq1, seq2, copy_aligned_seq1, copy_aligned_seq2, aligned_seq_index, highcell);
         }
     }
     // If the current direction index includes Left, add the corresponing character to the second sequence and a gap to the second sequence
-    else if directions[cell as usize] == Direction::Up {
-        //println!("Left");
+    else if directions[cell as usize] == Direction::Left {
+        println!("Left");
         let copy_aligned_seq2:&mut Vec<Vec<char>> = &mut new_aligned_seq2;
         let copy_aligned_seq1:&mut Vec<Vec<char>> = &mut new_aligned_seq1;
-        copy_aligned_seq1[*aligned_seq_index].insert(0, seq1_char);
-        copy_aligned_seq2[*aligned_seq_index].insert(0, '-');
+        copy_aligned_seq1[*aligned_seq_index].insert(0, '-');
+        copy_aligned_seq2[*aligned_seq_index].insert(0, seq2_char);
         // Move to the cell to the diagonally left of the current cell
-        println!("220");
         let new_directions = updateDirections(directions, score_grid, cell as usize, Direction::Left, seq2.len());
         if (cell - 1) as i32 >= 0 && (score_grid[cell as usize] > 0) && seq1_char_index > 0 && seq2_char_index > 0{
-            priv_best_alignment(score_grid, new_directions, Direction::Left, cell - seq2.len() as i32- 1, seq1, seq2, copy_aligned_seq1, copy_aligned_seq2, aligned_seq_index, highcell);
+            priv_best_alignment(score_grid, new_directions, Direction::Left, cell - 1, seq1, seq2, copy_aligned_seq1, copy_aligned_seq2, aligned_seq_index, highcell);
         }
     }
     println!("Got alignments");
@@ -259,12 +242,14 @@ pub fn build_best_alignment <'a> (score_grid: &'a Vec<i32>, directions:&'a mut V
     if cell == vec![-1] {
         return (vec![], vec![]);
     } 
+    println!("# cells: {}", directions.len());
     let (mut sequences1, mut sequences2): (Vec<String>, Vec<String>) = (vec![], vec![]);
     for i in cell {
-
         println!("{}", i);
-        while directions[i as usize] != (Direction::None){
-            let (mut new_sequences1, mut new_sequences2) = best_alignment(score_grid, directions, i, seq1.clone(), seq2.clone());
+        let mut copy_directions = directions.clone();
+        while copy_directions[i as usize] != (Direction::None){
+            println!("New sequence");
+            let (mut new_sequences1, mut new_sequences2) = best_alignment(score_grid, &mut copy_directions, i, seq1.clone(), seq2.clone());
             sequences1.append(&mut new_sequences1);
             sequences2.append(&mut new_sequences2);
         }
