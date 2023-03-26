@@ -1,30 +1,31 @@
+#![feature(test)]
 use std::env;
-use clam::prelude::*;
-use random_string::generate;
-
+extern crate test;
 fn main() {
     let args: Vec<String> = env::args().collect();
     let algorithm = &args[1];
     let seq1 = &args[2];
     let seq2= &args[3];
     if algorithm == "Needleman-Wunsch" {
-        algorithms_lib::Needleman_Wunsch::align(seq1.to_string(), seq2.to_string());
+        algorithms_lib::needleman_wunsch::align(seq1.to_string(), seq2.to_string());
     }
     else if algorithm == "Smith-Waterman" {
-        algorithms_lib::Smith_Waterman::align(seq1.to_string(), seq2.to_string());
+        algorithms_lib::smith_waterman::align(seq1.to_string(), seq2.to_string());
     }
     else {
         println!("Algorithm is unknown. Please run program again!");
     }
 }
 
+
 #[cfg(test)]
-mod test {
+mod tests {
     mod test_nw {
         mod test_nw_5 {
             use clam::Metric;
-            use algorithms_lib::Needleman_Wunsch::NeedlemanWunsch;
-            
+            use algorithms_lib::needleman_wunsch::NeedlemanWunsch; 
+            use test::Bencher;
+
             #[test]
             fn metric_nw_5to5_test(){
                 let seq1_c: String = "AAACT".to_string();
@@ -34,8 +35,6 @@ mod test {
                 let metric: NeedlemanWunsch = NeedlemanWunsch{seq1, seq2};
                 let _score:i8 = metric.one_to_one(seq1_c.as_bytes(), seq2_c.as_bytes());
             }
-
-            #[test] 
             fn metric_nw_5to10_test(){
                 let seq1_c: String = "AAACT".to_string();
                 let seq2_c: String = "TTGCTTTGAT".to_string();
@@ -88,7 +87,7 @@ mod test {
 
         mod test_nw_10 {
             use clam::Metric;
-            use algorithms_lib::Needleman_Wunsch::NeedlemanWunsch;            
+            use algorithms_lib::needleman_wunsch::NeedlemanWunsch;            
             #[test]
             fn metric_nw_10to5_test(){
                 let seq1_c: String = "CAGAATATTA".to_string();
@@ -152,7 +151,7 @@ mod test {
 
         mod test_nw_20 {
             use clam::Metric;
-            use algorithms_lib::Needleman_Wunsch::NeedlemanWunsch;
+            use algorithms_lib::needleman_wunsch::NeedlemanWunsch;
             #[test]
             fn metric_nw_20to5_test(){
                 let seq1_c: String = "GAAAGCCTATCGTCTGAGCG".to_string();
@@ -216,7 +215,7 @@ mod test {
 
         mod test_nw_30 {
             use clam::Metric;
-            use algorithms_lib::Needleman_Wunsch::NeedlemanWunsch;
+            use algorithms_lib::needleman_wunsch::NeedlemanWunsch;
             #[test]
             fn metric_nw_30to5_test(){
                 let seq1_c: String = "TGACCCACATTCATTCACTTATAGTATCTG".to_string();
@@ -280,7 +279,7 @@ mod test {
 
         mod test_nw_40 {
             use clam::Metric;
-            use algorithms_lib::Needleman_Wunsch::NeedlemanWunsch;
+            use algorithms_lib::needleman_wunsch::NeedlemanWunsch;
             #[test]
             fn metric_nw_40to5_test(){
                 let seq1_c: String = "CCCTTAACCGAGTCTATGAACCTTATAAACAAGCCTTGCG".to_string();
@@ -345,7 +344,7 @@ mod test {
 
     mod test_nw_50 {
         use clam::Metric;
-        use algorithms_lib::Needleman_Wunsch::NeedlemanWunsch;
+        use algorithms_lib::needleman_wunsch::NeedlemanWunsch;
         #[test]
         fn metric_nw_50to5_test(){
             let seq1_c: String = "ATAATATCTAAAACAGCGATACTTGTATTGCTCGCCTGGGTACAATAGTT".to_string();
@@ -411,7 +410,7 @@ mod test {
     mod test_sw {
         mod test_sw_5 {
             use clam::Metric;
-            use algorithms_lib::Smith_Waterman::SmithWaterman;
+            use algorithms_lib::smith_waterman::SmithWaterman;
             
             #[test]
             fn metric_sw_5to5_test(){
@@ -476,7 +475,7 @@ mod test {
     
         mod test_sw_10 {
             use clam::Metric;
-            use algorithms_lib::Smith_Waterman::SmithWaterman;            
+            use algorithms_lib::smith_waterman::SmithWaterman;            
             #[test]
             fn metric_sw_10to5_test(){
                 let seq1_c: String = "CAGAATATTA".to_string();
@@ -540,7 +539,7 @@ mod test {
     
         mod test_sw_20 {
             use clam::Metric;
-            use algorithms_lib::Smith_Waterman::SmithWaterman;
+            use algorithms_lib::smith_waterman::SmithWaterman;
             #[test]
             fn metric_sw_20to5_test(){
                 let seq1_c: String = "GAAAGCCTATCGTCTGAGCG".to_string();
@@ -604,7 +603,7 @@ mod test {
     
         mod test_sw_30 {
             use clam::Metric;
-            use algorithms_lib::Smith_Waterman::SmithWaterman;
+            use algorithms_lib::smith_waterman::SmithWaterman;
             #[test]
             fn metric_sw_30to5_test(){
                 let seq1_c: String = "TGACCCACATTCATTCACTTATAGTATCTG".to_string();
@@ -668,7 +667,7 @@ mod test {
     
         mod test_sw_40 {
             use clam::Metric;
-            use algorithms_lib::Smith_Waterman::SmithWaterman;
+            use algorithms_lib::smith_waterman::SmithWaterman;
             #[test]
             fn metric_sw_40to5_test(){
                 let seq1_c: String = "CCCTTAACCGAGTCTATGAACCTTATAAACAAGCCTTGCG".to_string();
@@ -733,7 +732,7 @@ mod test {
     
     mod test_sw_50 {
         use clam::Metric;
-        use algorithms_lib::Smith_Waterman::SmithWaterman;
+        use algorithms_lib::smith_waterman::SmithWaterman;
         #[test]
         fn metric_sw_50to5_test(){
             let seq1_c: String = "ATAATATCTAAAACAGCGATACTTGTATTGCTCGCCTGGGTACAATAGTT".to_string();
