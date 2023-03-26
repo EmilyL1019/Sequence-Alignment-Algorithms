@@ -73,19 +73,14 @@ impl <T: Number, U: Number> Metric<T, U> for SmithWaterman {
 #[cfg(test)]
 mod tests {
     use clam::Metric;
-    use crate::Smith_Waterman::grid::Direction;
-    use crate::Smith_Waterman::grid::create_grid;
-    use crate::Smith_Waterman::alignment::build_best_alignment;
-    use crate::Smith_Waterman::alignment::highest_cell;
-    use crate::Smith_Waterman::alignment::print_alignments;
-    use crate::Smith_Waterman::alignment::score;
-    use crate::Smith_Waterman::align;
+    use crate::smith_waterman::grid::Direction;
+    use crate::smith_waterman::grid::create_grid;
+    use crate::smith_waterman::alignment::build_best_alignment;
+    use crate::smith_waterman::alignment::highest_cell;
+    use crate::smith_waterman::alignment::print_alignments;
+    use crate::smith_waterman::alignment::score;
+    use crate::smith_waterman::align;
     use super::SmithWaterman;
-    use super::grid;
-
-    struct ImportantExcerpt<'a> {
-        part: &'a str,
-    }
 
     #[test]
     fn test1() {
@@ -287,7 +282,7 @@ mod tests {
         0, 0, 0, 0, 0, 1, 0, 1, 1, 0,
         0, 0, 0, 1, 1, 0, 0, 0, 0, 0
         ];
-        let directions:Vec<Direction> = vec![Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left,
+        let directions:Vec<Direction> = vec![Direction::None, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left,
         Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, 
         Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, 
         Direction::Up, Direction::Diagonal, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Diagonal, 
@@ -394,7 +389,7 @@ mod tests {
         0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 1, 0, 0, 0
         ];
-        let directions:Vec<Direction> = vec![Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left,
+        let directions:Vec<Direction> = vec![Direction::None, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left,
         Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft,
         Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft,
         Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft,
@@ -444,7 +439,7 @@ mod tests {
         0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0
         ];
-        let directions:Vec<Direction> = vec![Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left,
+        let directions:Vec<Direction> = vec![Direction::None, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left,
         Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft,
         Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft,
         Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft,
@@ -494,7 +489,7 @@ mod tests {
         0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 2,
         0, 1, 2, 1, 0, 1, 2, 2, 1, 0, 1,
         0, 0, 1, 1, 0, 0, 1, 1, 1, 2, 1];
-        let directions:Vec<Direction> = vec![Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left,Direction::Left, Direction::Left,
+        let directions:Vec<Direction> = vec![Direction::None, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left,Direction::Left, Direction::Left,
         Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft,
         Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, 
         Direction::Up, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUpLeft,

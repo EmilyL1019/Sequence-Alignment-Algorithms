@@ -10,9 +10,7 @@ pub enum Direction {
     DiagonalUpLeft,
     None
 }
-struct ImportantExcerpt<'a> {
-    part: &'a str,
-}
+
 // Creates grid from user entered sequences
 pub fn create_grid<'a>(mut seq1: &'a mut String, mut seq2: &'a mut String, len1: i32, len2: i32) -> (Vec<i32>, Vec<Direction>) {
     // Create new vec and set up row and column labels
@@ -34,7 +32,7 @@ pub fn create_grid<'a>(mut seq1: &'a mut String, mut seq2: &'a mut String, len1:
 // Returns direction of the best score for a given cell
 fn max_cell_score<'a>(seq1: &'a mut String, seq2: &'a mut String, score_grid: &'a mut Vec<i32>, cell: &'a i32, directions: &'a mut Vec<Direction>) -> &'a mut Vec<Direction> {
     // Assign every cell but the first in the first row with Left
-    if (cell == &0) {
+    if cell == &0 {
         directions.push(Direction::None);
     }
     else if cell <= &(seq2.len() as i32) {
@@ -50,7 +48,7 @@ fn max_cell_score<'a>(seq1: &'a mut String, seq2: &'a mut String, score_grid: &'
         let seq_2_char_index = ((cell - 1) % (seq2.len() + 1) as i32) as usize;
         let seq_1_char = seq1.chars().nth(seq_1_char_index).unwrap();
         let seq_2_char = seq2.chars().nth(seq_2_char_index).unwrap();
-        let mut match_point = 0;
+        let match_point: i32;
         // Get surrounding scores
         if seq_1_char == seq_2_char {
             // Match scoore
