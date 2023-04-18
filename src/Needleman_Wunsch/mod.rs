@@ -3,18 +3,15 @@ mod alignment;
 
 use clam::prelude::*;
 
-struct ImportantExcerpt<'a> {
-    part: &'a str,
-}
 
 pub fn align(mut seq1: String, mut seq2: String) -> (Vec<String>, Vec<String>, i32){
     // Get the length
     let len1 = seq1.len() as i32;
     let len2 = seq2.len() as i32;
     // Create the grid
-    let (grid, directions) = grid::create_grid(&mut seq1, &mut seq2, len1, len2);
+    let (grid, mut directions) = grid::create_grid(&mut seq1, &mut seq2, len1, len2);
     // Build and print alignment
-    let (aligned_seq1, aligned_seq2) = alignment::build_best_alignment(&grid, &directions, len1 * len2 - 1, &mut seq1, &mut seq2);
+    let (aligned_seq1, aligned_seq2) = alignment::build_best_alignment(&grid, &mut directions, seq1, seq2);
     let score = alignment::score(&aligned_seq1[0], &aligned_seq2[0]);
     alignment::print_alignments(&aligned_seq1, &aligned_seq2, score);
     return (aligned_seq1, aligned_seq2, score); 
@@ -26,9 +23,9 @@ pub fn align_no_print(mut seq1: String, mut seq2: String) -> i32{
     let len1 = seq1.len() as i32;
     let len2 = seq2.len() as i32;
     // Create the grid
-    let (grid, directions) = grid::create_grid(&mut seq1, &mut seq2, len1, len2);
+    let (grid, mut directions) = grid::create_grid(&mut seq1, &mut seq2, len1, len2);
     // Build and print alignment
-    let (aligned_seq1, aligned_seq2) = alignment::build_best_alignment(&grid, &directions, len1 * len2 - 1, &mut seq1, &mut seq2);
+    let (aligned_seq1, aligned_seq2) = alignment::build_best_alignment(&grid, &mut directions, seq1, seq2);
     let score = alignment::score(&aligned_seq1[0], &aligned_seq2[0]);
     return score;
 }
@@ -86,18 +83,14 @@ impl <T: Number, U: Number> Metric<T, U> for NeedlemanWunsch {
 #[cfg(test)]
 mod tests {
     use clam::Metric;
-    use crate::Needleman_Wunsch::grid::Direction;
-    use crate::Needleman_Wunsch::grid::create_grid;
-    use crate::Needleman_Wunsch::alignment::build_best_alignment;
-    use crate::Needleman_Wunsch::alignment::print_alignments;
-    use crate::Needleman_Wunsch::alignment::score;
-    use crate::Needleman_Wunsch::align;
+    use crate::needleman_wunsch::grid::Direction;
+    use crate::needleman_wunsch::grid::create_grid;
+    use crate::needleman_wunsch::alignment::build_best_alignment;
+    use crate::needleman_wunsch::alignment::print_alignments;
+    use crate::needleman_wunsch::alignment::score;
+    use crate::needleman_wunsch::align;
     use super::NeedlemanWunsch;
-
-    struct ImportantExcerpt<'a> {
-        part: &'a str,
-    }
-   
+    
     #[test]
     fn test1() {
         let grid: Vec<i32> = vec![0, -1, -2, -3, -4, -5, -6, -7, -8, -9, -10,
@@ -111,28 +104,31 @@ mod tests {
         -8, -6, -4, -4, -2, 0, 0, 1, 1, 1, 1,
         -9, -7, -5, -3, -3, -1, -1, 0, 2, 2, 1,
         -10, -8, -6, -4, -4, -2, -2, -1, 1, 1, 1];
-        let directions:Vec<Direction> = vec![Direction::Diagonal, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::Diagonal, Direction::DiagonalLeft, Direction::Left, Direction::Left, Direction::Left,
-        Direction::DiagonalUp, Direction::Diagonal, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::DiagonalLeft,
-        Direction::DiagonalUp, Direction::Up, Direction::Diagonal, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::Left,
-        Direction::Diagonal, Direction::Up, Direction::Up, Direction::Diagonal, Direction::DiagonalLeft, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::DiagonalLeft,
-        Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::Up, Direction::Diagonal, Direction::Diagonal, Direction::DiagonalLeft, Direction::Left, Direction::Left, Direction::Left, 
-        Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::Diagonal, Direction::Left, Direction::Left, Direction::Left, 
-        Direction::DiagonalUp, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::Up, Direction::Up, Direction::Diagonal, Direction::DiagonalLeft, Direction::Diagonal,
-        Direction::Up, Direction::Diagonal, Direction::Up, Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::Up,
-        Direction::Up, Direction::Up, Direction::Diagonal, Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::Diagonal, Direction::Diagonal, Direction::Left,
-        Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Diagonal];
+        let directions:Vec<Direction> = vec![Direction::None, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left,
+        Direction::Up, Direction::Diagonal, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::Diagonal, Direction::DiagonalLeft, Direction::Left, Direction::Left, Direction::Left,
+        Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::DiagonalLeft,
+        Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::Diagonal, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::Left,
+        Direction::Up, Direction::Diagonal, Direction::Up, Direction::Up, Direction::Diagonal, Direction::DiagonalLeft, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::DiagonalLeft,
+        Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::Up, Direction::Diagonal, Direction::Diagonal, Direction::DiagonalLeft, Direction::Left, Direction::Left, Direction::Left, 
+        Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::Diagonal, Direction::Left, Direction::Left, Direction::Left, 
+        Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::Up, Direction::Up, Direction::Diagonal, Direction::DiagonalLeft, Direction::Diagonal,
+        Direction::Up, Direction::Up, Direction::Diagonal, Direction::Up, Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::Up,
+        Direction::Up, Direction::Up, Direction::Up, Direction::Diagonal, Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::Diagonal, Direction::Diagonal, Direction::Left,
+        Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Diagonal];
         let mut seq1: String = "GTCAGGATCT".to_string();
         let mut seq2: String = "ATCAAGGCCA".to_string();
-        let (ftn_grid, ftn_directions) = create_grid(&mut seq1, &mut seq2, 10, 10);
+        let (ftn_grid, mut ftn_directions) = create_grid(&mut seq1, &mut seq2, 10, 10);
         // Check values
-        for i in 0..120 {
+        for i in 0..121 {
             assert_eq!(grid[i], ftn_grid[i]);
+            
         }
         // Check directions
-        for i in 0..100 {
+        for i in 0..121 {
             assert_eq!(directions[i], ftn_directions[i]);
+            
         }
-        let (aligned_seq1, aligned_seq2) = build_best_alignment(&ftn_grid, &ftn_directions, 99, &mut seq1, &mut seq2);
+        let (aligned_seq1, aligned_seq2) = build_best_alignment(&ftn_grid, &mut ftn_directions, seq1, seq2);
         let score = score(&aligned_seq1[0], &aligned_seq2[0]);
         print_alignments(&aligned_seq1, &aligned_seq2, score);
         assert_eq!(aligned_seq1, vec!["GTC-AGGATCT", "GTCA-GGATCT", "GTC-AGGATCT", "GTCA-GGATCT"]);
@@ -159,18 +155,19 @@ mod tests {
         -6, -4, -4, -2, 0, 0,
         -7, -5, -5, -3, -1, -1,
         -8, -6, -6, -4, -2, 0];
-        let directions:Vec<Direction> = vec![Direction::Diagonal, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::Diagonal, Direction::DiagonalLeft,
-        Direction::DiagonalUp, Direction::Diagonal, Direction::Left, Direction::Left, Direction::DiagonalLeft,
-        Direction::DiagonalUp, Direction::Up, Direction::Diagonal, Direction::Left, Direction::Left,
-        Direction::Diagonal, Direction::Up, Direction::Up, Direction::Diagonal, Direction::DiagonalLeft,
-        Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::Diagonal, Direction::Diagonal,
-        Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp,
-        Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp,
-        Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::Diagonal
+        let directions:Vec<Direction> = vec![Direction::None, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left,
+        Direction::Up, Direction::Diagonal, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::Diagonal, Direction::DiagonalLeft,
+        Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::Left, Direction::Left, Direction::DiagonalLeft,
+        Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::Diagonal, Direction::Left, Direction::Left,
+        Direction::Up, Direction::Diagonal, Direction::Up, Direction::Up, Direction::Diagonal, Direction::DiagonalLeft,
+        Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::Diagonal, Direction::Diagonal,
+        Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp,
+        Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp,
+        Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::Diagonal
         ];
         let mut seq1: String = "ATGCAGGA".to_string();
         let mut seq2: String = "CTGAA".to_string();
-        let (ftn_grid, ftn_directions) = create_grid(&mut seq1, &mut seq2, 8, 5);
+        let (ftn_grid, mut ftn_directions) = create_grid(&mut seq1, &mut seq2, 8, 5);
         // Check values
         for i in 0..54 {
             assert_eq!(grid[i], ftn_grid[i]);
@@ -179,13 +176,14 @@ mod tests {
         for i in 0..40 {
             assert_eq!(directions[i], ftn_directions[i]);
         }
-        let (aligned_seq1, aligned_seq2) = build_best_alignment(&ftn_grid, &ftn_directions, 39, &mut seq1, &mut seq2);
+        let (aligned_seq1, aligned_seq2) = build_best_alignment(&ftn_grid, &mut ftn_directions, seq1, seq2);
         let score = score(&aligned_seq1[0],&aligned_seq2[0]);
         print_alignments(&aligned_seq1, &aligned_seq2, score);
         assert_eq!(aligned_seq1, vec!["ATGCAGGA"]);
         assert_eq!(aligned_seq2, vec!["CTG-A--A"]);
         assert_eq!(score, 0);
     }
+
     #[test]
     fn clam_ftn_test2() {
         let seq1: String = "ATGCAGGA".to_string();
@@ -219,31 +217,31 @@ mod tests {
         -19, -17, -15, -13, -13, -11, -9, -7, -5, -3, -1, -2, -2, -2, -1, -1,
         -20, -18, -16, -14, -14, -12, -10, -8, -6, -4, -2, -2, -3, -3, -2, -3
         ];
-        let directions:Vec<Direction> = vec![
-        Direction::Diagonal, Direction::Diagonal, Direction::Left, Direction::Left, Direction::Left, Direction::DiagonalLeft, Direction::Left, Direction::Left, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left,
-        Direction::DiagonalUp, Direction::Diagonal, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::Diagonal, Direction::Left, Direction::Left, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left,
-        Direction::DiagonalUp, Direction::Up, Direction::Diagonal, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::Up, Direction::Diagonal, Direction::DiagonalLeft, Direction::Left, Direction::Left, Direction::DiagonalLeft, Direction::Left, Direction::Left, Direction::DiagonalLeft, Direction::Left,
-        Direction::DiagonalUp, Direction::Up, Direction::Diagonal, Direction::Diagonal, Direction::Left, Direction::Left, Direction::Up, Direction::Diagonal, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::Diagonal, Direction::Left, Direction::DiagonalLeft,
-        Direction::DiagonalUp, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::Diagonal, Direction::Left, Direction::Left, Direction::Diagonal, Direction::DiagonalLeft, Direction::Left, Direction::Left, Direction::Left, Direction::DiagonalLeft, Direction::DiagonalLeft,
-        Direction::DiagonalUp, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Diagonal, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::Diagonal, Direction::Diagonal, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left,
-        Direction::DiagonalUp, Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Up, Direction::Diagonal, Direction::DiagonalLeft, Direction::Left, Direction::Up, Direction::Diagonal, Direction::Left, Direction::Left, Direction::DiagonalLeft, Direction::Left,
-        Direction::DiagonalUp, Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::Left, Direction::Left, Direction::DiagonalUp, Direction::Diagonal, Direction::DiagonalLeft, Direction::Diagonal, Direction::Left,
-        Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::Left, Direction::Up, Direction::Up, Direction::Up, Direction::Diagonal, Direction::DiagonalLeft, Direction::DiagonalUpLeft, Direction::DiagonalUp, Direction::Diagonal, Direction::Left, Direction::Diagonal, 
-        Direction::DiagonalUp, Direction::Up, Direction::Up, Direction::Up, Direction::Diagonal, Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Diagonal, Direction::Diagonal, Direction::Left, Direction::Up, Direction::Diagonal, Direction::Left, 
-        Direction::Diagonal, Direction::Up, Direction::Up, Direction::Up, Direction::Diagonal, Direction::Left, Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Up, Direction::Diagonal, Direction::Left, Direction::Up, Direction::Diagonal,
-        Direction::Up, Direction::Diagonal, Direction::Up, Direction::Up, Direction::Up, Direction::Diagonal, Direction::Left, Direction::Up, Direction::Diagonal, Direction::Diagonal, Direction::UpLeft, Direction::Up, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUp,
-        Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::Up, Direction::Up, Direction::Diagonal, Direction::DiagonalLeft, Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::UpLeft, Direction::DiagonalUp, Direction::Diagonal, Direction::Left,
-        Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::Diagonal, Direction::Diagonal, Direction::Diagonal, Direction::Up, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::Up, Direction::Diagonal,
-        Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUp, Direction::Diagonal, Direction::Up, Direction::DiagonalUp,
-        Direction::Up, Direction::Up, Direction::Diagonal, Direction::DiagonalUp, Direction::Up, Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::Up, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::UpLeft, Direction::Diagonal,
-        Direction::Up, Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::Up, Direction::Up, Direction::Diagonal, Direction::Left, Direction::Up, Direction::Diagonal, Direction::UpLeft, 
-        Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::Up, Direction::Diagonal, Direction::Diagonal, Direction::Up, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::Up, Direction::Diagonal,
-        Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::UpLeft, Direction::DiagonalUp, Direction::Diagonal, Direction::Up, Direction::DiagonalUp,
-        Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp
+        let directions:Vec<Direction> = vec![Direction::None, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, 
+        Direction::Up, Direction::Diagonal, Direction::Diagonal, Direction::Left, Direction::Left, Direction::Left, Direction::DiagonalLeft, Direction::Left, Direction::Left, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left,
+        Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::Diagonal, Direction::Left, Direction::Left, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left,
+        Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::Diagonal, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::Up, Direction::Diagonal, Direction::DiagonalLeft, Direction::Left, Direction::Left, Direction::DiagonalLeft, Direction::Left, Direction::Left, Direction::DiagonalLeft, Direction::Left,
+        Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::Diagonal, Direction::Diagonal, Direction::Left, Direction::Left, Direction::Up, Direction::Diagonal, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::Diagonal, Direction::Left, Direction::DiagonalLeft,
+        Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::Diagonal, Direction::Left, Direction::Left, Direction::Diagonal, Direction::DiagonalLeft, Direction::Left, Direction::Left, Direction::Left, Direction::DiagonalLeft, Direction::DiagonalLeft,
+        Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Diagonal, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::Diagonal, Direction::Diagonal, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left,
+        Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Up, Direction::Diagonal, Direction::DiagonalLeft, Direction::Left, Direction::Up, Direction::Diagonal, Direction::Left, Direction::Left, Direction::DiagonalLeft, Direction::Left,
+        Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::Left, Direction::Left, Direction::DiagonalUp, Direction::Diagonal, Direction::DiagonalLeft, Direction::Diagonal, Direction::Left,
+        Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::Left, Direction::Up, Direction::Up, Direction::Up, Direction::Diagonal, Direction::DiagonalLeft, Direction::DiagonalUpLeft, Direction::DiagonalUp, Direction::Diagonal, Direction::Left, Direction::Diagonal, 
+        Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::Up, Direction::Up, Direction::Diagonal, Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Diagonal, Direction::Diagonal, Direction::Left, Direction::Up, Direction::Diagonal, Direction::Left, 
+        Direction::Up, Direction::Diagonal, Direction::Up, Direction::Up, Direction::Up, Direction::Diagonal, Direction::Left, Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Up, Direction::Diagonal, Direction::Left, Direction::Up, Direction::Diagonal,
+        Direction::Up, Direction::Up, Direction::Diagonal, Direction::Up, Direction::Up, Direction::Up, Direction::Diagonal, Direction::Left, Direction::Up, Direction::Diagonal, Direction::Diagonal, Direction::UpLeft, Direction::Up, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUp,
+        Direction::Up, Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::Up, Direction::Up, Direction::Diagonal, Direction::DiagonalLeft, Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::UpLeft, Direction::DiagonalUp, Direction::Diagonal, Direction::Left,
+        Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::Diagonal, Direction::Diagonal, Direction::Diagonal, Direction::Up, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::Up, Direction::Diagonal,
+        Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUp, Direction::Diagonal, Direction::Up, Direction::DiagonalUp,
+        Direction::Up, Direction::Up, Direction::Up, Direction::Diagonal, Direction::DiagonalUp, Direction::Up, Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::Up, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::UpLeft, Direction::Diagonal,
+        Direction::Up, Direction::Up, Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::Up, Direction::Up, Direction::Diagonal, Direction::Left, Direction::Up, Direction::Diagonal, Direction::UpLeft, 
+        Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::Up, Direction::Diagonal, Direction::Diagonal, Direction::Up, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::Up, Direction::Diagonal,
+        Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::UpLeft, Direction::DiagonalUp, Direction::Diagonal, Direction::Up, Direction::DiagonalUp,
+        Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::DiagonalUp, Direction::Up, Direction::DiagonalUp
         ];
         let mut seq1: String = "AAGTAAGGTGCAGAATGAAA".to_string();
         let mut seq2: String = "CATTCAGGAAGCTGT".to_string();
-        let (ftn_grid, ftn_directions) = create_grid(&mut seq1, &mut seq2, 20, 15);
+        let (ftn_grid, mut ftn_directions) = create_grid(&mut seq1, &mut seq2, 20, 15);
         //  Check values
         for i in 0..335 {
             assert_eq!(grid[i], ftn_grid[i]); 
@@ -253,7 +251,7 @@ mod tests {
             assert_eq!(directions[i], ftn_directions[i]);
         }   
         // Create and check alignments
-        let (aligned_seq1, aligned_seq2) = build_best_alignment(&ftn_grid, &ftn_directions, 299, &mut seq1, &mut seq2);
+        let (aligned_seq1, aligned_seq2) = build_best_alignment(&ftn_grid, &mut ftn_directions, seq1, seq2);
         let score = score(&aligned_seq1[0], &aligned_seq2[0]);
         print_alignments(&aligned_seq1, &aligned_seq2, score);
         assert_eq!(aligned_seq1, vec!["AAGTAAGGTGCAGAATGAAA", "AAGTAAGGTGCAGAATGAAA", "AAGTAAGGTGCAGAATGAAA", "AAGTAAGGTGCAGAATGAAA", "AAGTAAGGTGCAGAATGAAA", "AAGTAAGGTGCAGAATGAAA",
@@ -299,16 +297,17 @@ mod tests {
         -5, -3, -3, -3, -3, -2, -3, -2, -2, -3,
         -6, -4, -4, -2, -2, -3, -3, -3, -3, -3
         ];
-        let directions:Vec<Direction> = vec![Direction::Diagonal, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::Diagonal, Direction::Left, Direction::Left, Direction::Left, Direction::Left,
-        Direction::DiagonalUp, Direction::Diagonal, Direction::Diagonal, Direction::DiagonalLeft, Direction::Left, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::DiagonalLeft, 
-        Direction::Diagonal, Direction::Diagonal, Direction::UpLeft, Direction::Diagonal, Direction::DiagonalLeft, Direction::Diagonal, Direction::Left, Direction::DiagonalLeft, Direction::DiagonalLeft,
-        Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Up, Direction::Diagonal, Direction::Left, Direction::Left, 
-        Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Diagonal, Direction::Diagonal, Direction::Left, Direction::Up, Direction::Diagonal, Direction::DiagonalLeft,
-        Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::Diagonal, Direction::UpLeft, Direction::Diagonal, Direction::Up, Direction::DiagonalUp, Direction::Diagonal
+        let directions:Vec<Direction> = vec![Direction::None, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left,
+        Direction::Up, Direction::Diagonal, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::Diagonal, Direction::Left, Direction::Left, Direction::Left, Direction::Left,
+        Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::Diagonal, Direction::DiagonalLeft, Direction::Left, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::DiagonalLeft, 
+        Direction::Up, Direction::Diagonal, Direction::Diagonal, Direction::UpLeft, Direction::Diagonal, Direction::DiagonalLeft, Direction::Diagonal, Direction::Left, Direction::DiagonalLeft, Direction::DiagonalLeft,
+        Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Up, Direction::Diagonal, Direction::Left, Direction::Left, 
+        Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Diagonal, Direction::Diagonal, Direction::Left, Direction::Up, Direction::Diagonal, Direction::DiagonalLeft,
+        Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::Diagonal, Direction::UpLeft, Direction::Diagonal, Direction::Up, Direction::DiagonalUp, Direction::Diagonal
         ];
         let mut seq1: String = "TGACTG".to_string();
         let mut seq2: String = "AAGGTACAA".to_string();
-        let (ftn_grid, ftn_directions) = create_grid(&mut seq1, &mut seq2, 6, 9);
+        let (ftn_grid, mut ftn_directions) = create_grid(&mut seq1, &mut seq2, 6, 9);
         //  Check values
         for i in 0..69 {
             assert_eq!(grid[i], ftn_grid[i]); 
@@ -318,7 +317,7 @@ mod tests {
             assert_eq!(directions[i], ftn_directions[i]);
         }   
         // Create and check alignments
-        let (aligned_seq1, aligned_seq2) = build_best_alignment(&ftn_grid, &ftn_directions, 53, &mut seq1, &mut seq2);
+        let (aligned_seq1, aligned_seq2) = build_best_alignment(&ftn_grid, &mut ftn_directions, seq1, seq2);
         let score = score(&aligned_seq1[0], &aligned_seq2[0]);
         print_alignments(&aligned_seq1, &aligned_seq2, score);
         assert_eq!(aligned_seq1, vec!["--TG-ACTG", "-T-G-ACTG", "T--G-ACTG", "-TG--ACTG", "T-G--ACTG"]);
@@ -349,19 +348,20 @@ mod tests {
         -8, -6, -4, -4, -2, -2, -1,
         -9, -7, -5, -5, -3, -1, -2
         ];
-        let directions:Vec<Direction> = vec![Direction::Diagonal, Direction::DiagonalLeft, Direction::Diagonal, Direction::Left, Direction::Left, Direction::Left,
-        Direction::Diagonal, Direction::Diagonal, Direction::Left, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::Diagonal,
-        Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::Diagonal, Direction::Left, Direction::Left, 
-        Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Up, Direction::Diagonal, Direction::Left,
-        Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Diagonal, Direction::Up, Direction::Diagonal,
-        Direction::DiagonalUp, Direction::Diagonal, Direction::Left, Direction::Up, Direction::Up, Direction::Diagonal, 
-        Direction::Up, Direction::Up, Direction::Diagonal, Direction::Up, Direction::Diagonal, Direction::Up, 
-        Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::Up, Direction::Up, 
-        Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::Diagonal, Direction::UpLeft
+        let directions:Vec<Direction> = vec![Direction::None, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left,
+        Direction::Up, Direction::Diagonal, Direction::DiagonalLeft, Direction::Diagonal, Direction::Left, Direction::Left, Direction::Left,
+        Direction::Up, Direction::Diagonal, Direction::Diagonal, Direction::Left, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::Diagonal,
+        Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::Diagonal, Direction::Left, Direction::Left, 
+        Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Up, Direction::Diagonal, Direction::Left,
+        Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Diagonal, Direction::Up, Direction::Diagonal,
+        Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::Left, Direction::Up, Direction::Up, Direction::Diagonal,
+        Direction::Up, Direction::Up, Direction::Up, Direction::Diagonal, Direction::Up, Direction::Diagonal, Direction::Up, 
+        Direction::Up, Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::Up, Direction::Up, 
+        Direction::Up, Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::Up, Direction::Diagonal, Direction::UpLeft
         ];
         let mut seq1: String = "CTAGATGAG".to_string();
         let mut seq2: String = "TTCAGT".to_string();
-        let (ftn_grid, ftn_directions) = create_grid(&mut seq1, &mut seq2, 9, 6);
+        let (ftn_grid, mut ftn_directions) = create_grid(&mut seq1, &mut seq2, 9, 6);
         //  Check values
         for i in 0..69 {
             assert_eq!(grid[i], ftn_grid[i]); 
@@ -371,11 +371,11 @@ mod tests {
             assert_eq!(directions[i], ftn_directions[i]);
         }   
         // Create and check alignments
-        let (aligned_seq1, aligned_seq2) = build_best_alignment(&ftn_grid, &ftn_directions, 53, &mut seq1, &mut seq2);
+        let (aligned_seq1, aligned_seq2) = build_best_alignment(&ftn_grid, &mut ftn_directions, seq1, seq2);
         let score = score(&aligned_seq1[0], &aligned_seq2[0]);
         print_alignments(&aligned_seq1, &aligned_seq2, score);
-        assert_eq!(aligned_seq1, vec!["CTAGATGAG-", "CT-AGATGAG"]);
-        assert_eq!(aligned_seq2, vec!["-T---TCAGT", "TTCAG-T---"]);
+        assert_eq!(aligned_seq1, vec!["CT-AGATGAG", "CTAGATGAG-"]);
+        assert_eq!(aligned_seq2, vec!["TTCAG-T---", "-T---TCAGT"]);
         assert_eq!(score, -2);
     }
     
@@ -384,8 +384,8 @@ mod tests {
         let seq1: String = "CTAGATGAG".to_string();
         let seq2: String = "TTCAGT".to_string();
         let (aligned_seq1, aligned_seq2, score) = align(seq1, seq2);
-        assert_eq!(aligned_seq1, vec!["CTAGATGAG-", "CT-AGATGAG"]);
-        assert_eq!(aligned_seq2, vec!["-T---TCAGT", "TTCAG-T---"]);
+        assert_eq!(aligned_seq1, vec!["CT-AGATGAG", "CTAGATGAG-"]);
+        assert_eq!(aligned_seq2, vec!["TTCAG-T---", "-T---TCAGT"]);
         assert_eq!(score, -2);
     }
 
@@ -401,18 +401,19 @@ mod tests {
         -7, -5, -5, -5, -5, -4, -4, -5, -5,
         -8, -6, -6, -6, -6, -4, -5, -5, -6
         ];
-        let directions:Vec<Direction> = vec![Direction::Diagonal, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::Diagonal, Direction::Left, Direction::Left, Direction::Left,
-        Direction::DiagonalUp, Direction::Diagonal, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::Diagonal, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::DiagonalLeft, 
-        Direction::DiagonalUp, Direction::DiagonalUp, Direction::Diagonal, Direction::DiagonalLeft, Direction::Diagonal, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::DiagonalLeft, 
-        Direction::DiagonalUp, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Diagonal, Direction::Up, Direction::Diagonal, Direction::DiagonalLeft, Direction::DiagonalLeft, 
-        Direction::Diagonal, Direction::Diagonal, Direction::Diagonal, Direction::Left, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Left, Direction::Diagonal, 
-        Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Diagonal, Direction::Diagonal, Direction::UpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, 
-        Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Up, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::Diagonal, 
-        Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft
+        let directions:Vec<Direction> = vec![Direction::None, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left,
+        Direction::Up, Direction::Diagonal, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::Diagonal, Direction::Left, Direction::Left, Direction::Left,
+        Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::Diagonal, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::DiagonalLeft, 
+        Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Diagonal, Direction::DiagonalLeft, Direction::Diagonal, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::DiagonalLeft, 
+        Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Diagonal, Direction::Up, Direction::Diagonal, Direction::DiagonalLeft, Direction::DiagonalLeft, 
+        Direction::Up, Direction::Diagonal, Direction::Diagonal, Direction::Diagonal, Direction::Left, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::Left, Direction::Diagonal, 
+        Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Diagonal, Direction::Diagonal, Direction::UpLeft, Direction::Diagonal, Direction::DiagonalUpLeft, 
+        Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Up, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::Diagonal, 
+        Direction::Up, Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Diagonal, Direction::DiagonalUpLeft, Direction::Diagonal, Direction::DiagonalUpLeft
         ];
         let mut seq1 : String = "TTTGATGT".to_string();
         let mut seq2 : String = "AAACTACA".to_string();
-        let (ftn_grid, ftn_directions) = create_grid(&mut seq1, &mut seq2, 8, 8);
+        let (ftn_grid, mut ftn_directions) = create_grid(&mut seq1, &mut seq2, 8, 8);
         //  Check values
         for i in 0..80 {
             assert_eq!(grid[i], ftn_grid[i]); 
@@ -422,25 +423,25 @@ mod tests {
             assert_eq!(directions[i], ftn_directions[i]);
         }   
         // Create and check alignments
-        let (aligned_seq1, aligned_seq2) = build_best_alignment(&ftn_grid, &ftn_directions, 63, &mut seq1, &mut seq2);
+        let (aligned_seq1, aligned_seq2) = build_best_alignment(&ftn_grid, &mut ftn_directions, seq1, seq2);
         let score = score(&aligned_seq1[0], &aligned_seq2[0]);
         print_alignments(&aligned_seq1, &aligned_seq2, score);
-        assert_eq!(aligned_seq1, vec!["TTTGA-T-GT", "TTTGA-T-GT", "TTTGA-T-GT", "TTTGA-T-GT", "TTTGA-T-GT", 
-        "TTTGA-T-GT", "--TTTGATGT", "-T-TTGATGT", "T--TTGATGT", "-TT-TGATGT", 
-        "T-T-TGATGT", "TT--TGATGT", "TTTGA-TG-T", "TTTGA-TG-T", "TTTGA-TG-T", 
-        "TTTGA-TG-T", "TTTGA-TG-T", "TTTGA-TG-T", "--TTTGATGT", "-T-TTGATGT", 
-        "T--TTGATGT", "-TT-TGATGT", "T-T-TGATGT", "TT--TGATGT", "TTTGA-TGT-", 
+        assert_eq!(aligned_seq1, vec!["--TTTGATGT", "-T-TTGATGT",  "T--TTGATGT",  "-TT-TGATGT", "T-T-TGATGT", 
+        "TT--TGATGT", "TTTGA-T-GT", "TTTGA-T-GT", "TTTGA-T-GT", "TTTGA-T-GT", 
+        "TTTGA-T-GT", "TTTGA-T-GT", "--TTTGATGT", "-T-TTGATGT", "T--TTGATGT",
+        "-TT-TGATGT", "T-T-TGATGT", "TT--TGATGT", "TTTGA-TG-T", "TTTGA-TG-T", 
+        "TTTGA-TG-T", "TTTGA-TG-T", "TTTGA-TG-T", "TTTGA-TG-T", "--TTTGATGT", 
+        "-T-TTGATGT", "T--TTGATGT", "-TT-TGATGT", "T-T-TGATGT", "TT--TGATGT",
         "TTTGA-TGT-", "TTTGA-TGT-", "TTTGA-TGT-", "TTTGA-TGT-", "TTTGA-TGT-", 
-        "--TTTGATGT", "-T-TTGATGT", "T--TTGATGT", "-TT-TGATGT", "T-T-TGATGT",
-        "TT--TGATGT"]);
-        assert_eq!(aligned_seq2, vec!["--AAACTACA", "-A-AACTACA", "A--AACTACA", "-AA-ACTACA", "A-A-ACTACA", 
-        "AA--ACTACA", "AAACT-A-CA", "AAACT-A-CA", "AAACT-A-CA", "AAACT-A-CA", 
-        "AAACT-A-CA", "AAACT-A-CA", "--AAACTACA", "-A-AACTACA", "A--AACTACA", 
-        "-AA-ACTACA", "A-A-ACTACA", "AA--ACTACA", "AAACT-AC-A", "AAACT-AC-A",
-        "AAACT-AC-A", "AAACT-AC-A", "AAACT-AC-A", "AAACT-AC-A", "--AAACTACA",
-        "-A-AACTACA", "A--AACTACA", "-AA-ACTACA", "A-A-ACTACA", "AA--ACTACA", 
+        "TTTGA-TGT-"]);
+        assert_eq!(aligned_seq2, vec!["AAACT-A-CA", "AAACT-A-CA", "AAACT-A-CA", "AAACT-A-CA", "AAACT-A-CA",
+        "AAACT-A-CA", "--AAACTACA", "-A-AACTACA", "A--AACTACA", "-AA-ACTACA", 
+        "A-A-ACTACA", "AA--ACTACA", "AAACT-AC-A", "AAACT-AC-A", "AAACT-AC-A", 
+        "AAACT-AC-A", "AAACT-AC-A", "AAACT-AC-A", "--AAACTACA", "-A-AACTACA", 
+        "A--AACTACA", "-AA-ACTACA", "A-A-ACTACA", "AA--ACTACA", "AAACT-ACA-", 
         "AAACT-ACA-", "AAACT-ACA-", "AAACT-ACA-", "AAACT-ACA-", "AAACT-ACA-",
-        "AAACT-ACA-"]);
+        "--AAACTACA", "-A-AACTACA", "A--AACTACA", "-AA-ACTACA", "A-A-ACTACA", 
+        "AA--ACTACA"]);
         assert_eq!(score, -6);
     }
 
@@ -449,22 +450,22 @@ mod tests {
         let seq1 : String = "TTTGATGT".to_string();
         let seq2 : String = "AAACTACA".to_string();
         let (aligned_seq1, aligned_seq2, score) = align(seq1, seq2);
-        assert_eq!(aligned_seq1, vec!["TTTGA-T-GT", "TTTGA-T-GT", "TTTGA-T-GT", "TTTGA-T-GT", "TTTGA-T-GT", 
-        "TTTGA-T-GT", "--TTTGATGT", "-T-TTGATGT", "T--TTGATGT", "-TT-TGATGT", 
-        "T-T-TGATGT", "TT--TGATGT", "TTTGA-TG-T", "TTTGA-TG-T", "TTTGA-TG-T", 
-        "TTTGA-TG-T", "TTTGA-TG-T", "TTTGA-TG-T", "--TTTGATGT", "-T-TTGATGT", 
-        "T--TTGATGT", "-TT-TGATGT", "T-T-TGATGT", "TT--TGATGT", "TTTGA-TGT-", 
+        assert_eq!(aligned_seq1, vec!["--TTTGATGT", "-T-TTGATGT",  "T--TTGATGT",  "-TT-TGATGT", "T-T-TGATGT", 
+        "TT--TGATGT", "TTTGA-T-GT", "TTTGA-T-GT", "TTTGA-T-GT", "TTTGA-T-GT", 
+        "TTTGA-T-GT", "TTTGA-T-GT", "--TTTGATGT", "-T-TTGATGT", "T--TTGATGT",
+        "-TT-TGATGT", "T-T-TGATGT", "TT--TGATGT", "TTTGA-TG-T", "TTTGA-TG-T", 
+        "TTTGA-TG-T", "TTTGA-TG-T", "TTTGA-TG-T", "TTTGA-TG-T", "--TTTGATGT", 
+        "-T-TTGATGT", "T--TTGATGT", "-TT-TGATGT", "T-T-TGATGT", "TT--TGATGT",
         "TTTGA-TGT-", "TTTGA-TGT-", "TTTGA-TGT-", "TTTGA-TGT-", "TTTGA-TGT-", 
-        "--TTTGATGT", "-T-TTGATGT", "T--TTGATGT", "-TT-TGATGT", "T-T-TGATGT",
-        "TT--TGATGT"]);
-        assert_eq!(aligned_seq2, vec!["--AAACTACA", "-A-AACTACA", "A--AACTACA", "-AA-ACTACA", "A-A-ACTACA", 
-        "AA--ACTACA", "AAACT-A-CA", "AAACT-A-CA", "AAACT-A-CA", "AAACT-A-CA", 
-        "AAACT-A-CA", "AAACT-A-CA", "--AAACTACA", "-A-AACTACA", "A--AACTACA", 
-        "-AA-ACTACA", "A-A-ACTACA", "AA--ACTACA", "AAACT-AC-A", "AAACT-AC-A",
-        "AAACT-AC-A", "AAACT-AC-A", "AAACT-AC-A", "AAACT-AC-A", "--AAACTACA",
-        "-A-AACTACA", "A--AACTACA", "-AA-ACTACA", "A-A-ACTACA", "AA--ACTACA", 
+        "TTTGA-TGT-"]);
+        assert_eq!(aligned_seq2, vec!["AAACT-A-CA", "AAACT-A-CA", "AAACT-A-CA", "AAACT-A-CA", "AAACT-A-CA",
+        "AAACT-A-CA", "--AAACTACA", "-A-AACTACA", "A--AACTACA", "-AA-ACTACA", 
+        "A-A-ACTACA", "AA--ACTACA", "AAACT-AC-A", "AAACT-AC-A", "AAACT-AC-A", 
+        "AAACT-AC-A", "AAACT-AC-A", "AAACT-AC-A", "--AAACTACA", "-A-AACTACA", 
+        "A--AACTACA", "-AA-ACTACA", "A-A-ACTACA", "AA--ACTACA", "AAACT-ACA-", 
         "AAACT-ACA-", "AAACT-ACA-", "AAACT-ACA-", "AAACT-ACA-", "AAACT-ACA-",
-        "AAACT-ACA-"]);
+        "--AAACTACA", "-A-AACTACA", "A--AACTACA", "-AA-ACTACA", "A-A-ACTACA", 
+        "AA--ACTACA"]);
         assert_eq!(score, -6);
     }
 
@@ -477,15 +478,16 @@ mod tests {
         -4, -4, -4, -4, -4, -5,
         -5, -5, -5, -5, -5, -5
         ];
-        let directions:Vec<Direction> = vec![Direction::Diagonal, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::DiagonalLeft,
-        Direction::DiagonalUp, Direction::Diagonal, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::DiagonalLeft, 
-        Direction::DiagonalUp, Direction::DiagonalUp, Direction::Diagonal, Direction::DiagonalLeft, Direction::DiagonalLeft,
-        Direction::DiagonalUp, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Diagonal, Direction::DiagonalLeft, 
-        Direction::DiagonalUp, Direction::DiagonalUp, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Diagonal
+        let directions:Vec<Direction> = vec![Direction::None, Direction::Left, Direction::Left, Direction::Left, Direction::Left, Direction::Left, 
+        Direction::Up, Direction::Diagonal, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::DiagonalLeft,
+        Direction::Up, Direction::DiagonalUp, Direction::Diagonal, Direction::DiagonalLeft, Direction::DiagonalLeft, Direction::DiagonalLeft, 
+        Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Diagonal, Direction::DiagonalLeft, Direction::DiagonalLeft,
+        Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Diagonal, Direction::DiagonalLeft, 
+        Direction::Up, Direction::DiagonalUp, Direction::DiagonalUp, Direction::DiagonalUp, Direction::DiagonalUp, Direction::Diagonal
         ];
         let mut seq1 : String = "AAAAA".to_string();
         let mut seq2 : String = "TTTTT".to_string();
-        let (ftn_grid, ftn_directions) = create_grid(&mut seq1, &mut seq2, 5, 5);
+        let (ftn_grid, mut ftn_directions) = create_grid(&mut seq1, &mut seq2, 5, 5);
         //  Check values
         for i in 0..35 {
             assert_eq!(grid[i], ftn_grid[i]); 
@@ -495,7 +497,7 @@ mod tests {
             assert_eq!(directions[i], ftn_directions[i]);
         }   
         // Create and check alignments
-        let (aligned_seq1, aligned_seq2) = build_best_alignment(&ftn_grid, &ftn_directions, 24, &mut seq1, &mut seq2);
+        let (aligned_seq1, aligned_seq2) = build_best_alignment(&ftn_grid, &mut ftn_directions, seq1, seq2);
         let score = score(&aligned_seq1[0], &aligned_seq2[0]);
         print_alignments(&aligned_seq1, &aligned_seq2, score);
         assert_eq!(aligned_seq1, vec!["AAAAA"]);
